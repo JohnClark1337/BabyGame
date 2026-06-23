@@ -1,0 +1,80 @@
+using UnityEngine;
+
+public class ScreenEdgeBounds : MonoBehaviour
+{
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void AutoInitialize()
+    {
+        GameObject go = new GameObject("ScreenEdgeBounds");
+        go.AddComponent<ScreenEdgeBounds>();
+    }
+
+    [SerializeField] private float _thickness = 1f;
+    [SerializeField] private float _bounciness = 0.8f;
+    [SerializeField] private float _friction = 0.4f;
+
+    void Awake()
+    {
+        RemoveOldWalls();
+        CreateEdgeColliders();
+        AddShapeInteractionToShapes();
+    }
+
+    void RemoveOldWalls()
+    {
+        string[] wallNames = { "Square", "Square (1)", "Square (2)", "Square (3)" };
+        foreach (string name in wallNames)
+        {
+            GameObject wall = GameObject.Find(name);
+            if (wall != null)
+                Destroy(wall);
+        }
+    }
+
+    void CreateEdgeColliders()
+    {
+        Camera cam = Camera.main;
+        if (cam == null || !cam.orthographic) return;
+
+        PhysicsMaterial2D bouncyMat = new PhysicsMaterial2D();
+        bouncyMat.bounciness = _bounciness;
+        bouncyMat.friction = _friction;
+
+        float halfHeight = cam.orthographicSize;
+        float halfWidth = halfHeight * cam.aspect;
+
+        CreateEdge("Top", new Vector2(0, halfHeight + _thickness * 0.5f), new Vector2(halfWidth * 2, _thickness), bouncyMat);
+        CreateEdge("Bottom", new Vector2(0, -halfHeight - _thickness * 0.5f), new Vector2(halfWidth * 2, _thickness), bouncyMat);
+        CreateEdge("Left", new Vector2(-halfWidth - _thickness * 0.5f, 0), new Vector2(_thickness, halfHeight * 2), bouncyMat);
+        CreateEdge("Right", new Vector2(halfWidth + _thickness * 0.5f, 0), new Vector2(_thickness, halfHeight * 2), bouncyMat);
+    }
+
+    void CreateEdge(string side, Vector2 position, Vector2 size, PhysicsMaterial2D mat)
+    {
+        GameObject edge = new GameObject($"ScreenEdge_{side}");
+        edge.transform.SetParent(transform);
+        edge.transform.position = position;
+
+        BoxCollider2D collider = edge.AddComponent<BoxCollider2D>();
+        collider.size = size;
+        collider.sharedMaterial = mat;
+    }
+
+    void AddShapeInteractionToShapes()
+    {
+        string[] shapeNames = { "Circle", "Triangle", "Square (4)" };
+        foreach (string name in shapeNames)
+        {
+            GameObject shape = GameObject.Find(name);
+            if (shape != null)
+            {
+                if (shape.GetComponent<ShapeInteraction>() == null)
+                    shape.AddComponent<ShapeInteraction>();
+
+                TouchSoundPlayer tsp = shape.GetComponent<TouchSoundPlayer>();
+                if (tsp != null)
+                    Destroy(tsp);
+            }
+        }
+    }
+}
