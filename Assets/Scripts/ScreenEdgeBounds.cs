@@ -9,15 +9,25 @@ public class ScreenEdgeBounds : MonoBehaviour
         go.AddComponent<ScreenEdgeBounds>();
     }
 
-    [SerializeField] private float _thickness = 1f;
+    [SerializeField] private float _thickness = 2f;
     [SerializeField] private float _bounciness = 0.8f;
     [SerializeField] private float _friction = 0.4f;
 
     void Awake()
     {
         RemoveOldWalls();
+        TryCreateWalls();
+    }
+
+    void Start()
+    {
+        if (transform.childCount == 0)
+            TryCreateWalls();
+    }
+
+    void TryCreateWalls()
+    {
         CreateEdgeColliders();
-        AddShapeInteractionToShapes();
     }
 
     void RemoveOldWalls()
@@ -58,23 +68,5 @@ public class ScreenEdgeBounds : MonoBehaviour
         BoxCollider2D collider = edge.AddComponent<BoxCollider2D>();
         collider.size = size;
         collider.sharedMaterial = mat;
-    }
-
-    void AddShapeInteractionToShapes()
-    {
-        string[] shapeNames = { "Circle", "Triangle", "Square (4)" };
-        foreach (string name in shapeNames)
-        {
-            GameObject shape = GameObject.Find(name);
-            if (shape != null)
-            {
-                if (shape.GetComponent<ShapeInteraction>() == null)
-                    shape.AddComponent<ShapeInteraction>();
-
-                TouchSoundPlayer tsp = shape.GetComponent<TouchSoundPlayer>();
-                if (tsp != null)
-                    Destroy(tsp);
-            }
-        }
     }
 }

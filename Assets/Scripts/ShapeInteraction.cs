@@ -1,125 +1,178 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ShapeInteraction : MonoBehaviour
 {
-    [SerializeField] private Color _highlightColor = Color.yellow;
-    [SerializeField] private float _moveDuration = 0.4f;
-    [SerializeField] private float _scaleDuration = 0.2f;
-    [SerializeField] private float _postClipDelay = 0.3f;
-
     private Rigidbody2D _rb;
     private SpriteRenderer _sprite;
-    private Vector3 _originalPosition;
-    private Vector3 _originalScale;
-    private Color _originalColor;
-    private Vector2 _storedVelocity;
-    private float _storedAngularVelocity;
-    private bool _isAnimating = false;
     private string _shapeName;
     private string _clipName;
+
+    private static bool _showingInfo = false;
+    private static int _infoShownFrame = -1;
+    private static GameObject _darkOverlay;
+    private static GameObject _shapeDisplay;
+    private static GameObject _nameCanvas;
+    private static AudioSource _infoAudio;
+    private static Sprite _whiteSprite;
 
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _sprite = GetComponent<SpriteRenderer>();
-        _originalColor = _sprite.color;
-        _originalScale = transform.localScale;
-        _shapeName = gameObject.name;
-        _clipName = MapToClipName(_shapeName);
+        _shapeName = CleanName(gameObject.name);
+        _clipName = _shapeName.ToLowerInvariant();
     }
 
     void Update()
     {
-        if (_isAnimating) return;
+        if (_showingInfo)
+        {
+            if (_infoShownFrame != Time.frameCount && AnyTouchBeganThisFrame())
+                DismissInfo();
+            return;
+        }
 
-        if (Input.touchCount > 0)
+        if (AnyTouchBeganThisFrame())
+            CheckTouch(GetTouchPosition());
+    }
+
+    bool AnyTouchBeganThisFrame()
+    {
+        if (Touchscreen.current != null)
         {
-            Touch touch = Input.touches[0];
-            if (touch.phase == TouchPhase.Began)
-                CheckTouch(touch.position);
+            if (Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
+                return true;
         }
-        else if (Input.GetMouseButtonDown(0))
-        {
-            CheckTouch(Input.mousePosition);
-        }
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            return true;
+        return false;
+    }
+
+    Vector2 GetTouchPosition()
+    {
+        if (Touchscreen.current != null)
+            return Touchscreen.current.primaryTouch.position.ReadValue();
+        if (Mouse.current != null)
+            return Mouse.current.position.ReadValue();
+        return Vector2.zero;
     }
 
     void CheckTouch(Vector2 screenPosition)
     {
-        Ray ray = Camera.main.ScreenPointToRay(screenPosition);
-        RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
-        if (hit.collider != null && hit.collider.gameObject == gameObject)
-            StartCoroutine(AnimateShape());
+        Camera cam = Camera.main;
+        if (cam == null) return;
+        Vector3 worldPos = cam.ScreenToWorldPoint(screenPosition);
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null && col.OverlapPoint(worldPos))
+            ShowShapeInfo();
     }
 
-    System.Collections.IEnumerator AnimateShape()
+    void ShowShapeInfo()
     {
-        _isAnimating = true;
-        _originalPosition = transform.position;
-        _storedVelocity = _rb.linearVelocity;
-        _storedAngularVelocity = _rb.angularVelocity;
+        _showingInfo = true;
+        _infoShownFrame = Time.frameCount;
 
-        _rb.simulated = false;
+        foreach (var interaction in FindObjectsByType<ShapeInteraction>(FindObjectsSortMode.None))
+        {
+            if (interaction._rb != null)
+                interaction._rb.simulated = false;
+        }
 
-        Vector3 center = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, 0));
-        center.z = 0;
-        yield return StartCoroutine(MoveTo(center, _moveDuration));
+        if (_darkOverlay == null)
+            CreateOverlayObjects();
 
-        _sprite.color = _highlightColor;
-        Vector3 bigScale = _originalScale * 1.3f;
-        yield return StartCoroutine(ScaleTo(bigScale, _scaleDuration));
+        _darkOverlay.SetActive(true);
+        _shapeDisplay.SetActive(true);
+        _nameCanvas.SetActive(true);
 
-        string clipPath = $"Voices/{_clipName}";
-        AudioClip clip = Resources.Load<AudioClip>(clipPath);
-        float waitTime = 1f;
+        _shapeDisplay.GetComponent<SpriteRenderer>().sprite = _sprite.sprite;
+        _shapeDisplay.GetComponent<SpriteRenderer>().color = _sprite.color;
+        _nameCanvas.GetComponentInChildren<Text>().text = _shapeName;
+
+        AudioClip clip = Resources.Load<AudioClip>($"Voices/{_clipName}");
         if (clip != null)
-        {
-            AudioSource.PlayClipAtPoint(clip, Vector3.zero);
-            waitTime = clip.length + _postClipDelay;
-        }
-        yield return new WaitForSeconds(waitTime);
-
-        _sprite.color = _originalColor;
-        yield return StartCoroutine(ScaleTo(_originalScale, _scaleDuration));
-
-        yield return StartCoroutine(MoveTo(_originalPosition, _moveDuration));
-
-        _rb.simulated = true;
-        _rb.linearVelocity = _storedVelocity;
-        _rb.angularVelocity = _storedAngularVelocity;
-        _isAnimating = false;
+            _infoAudio.PlayOneShot(clip);
     }
 
-    string MapToClipName(string shapeName)
+    void CreateOverlayObjects()
     {
-        if (shapeName.StartsWith("Square"))
-            return "square";
-        return shapeName.ToLowerInvariant();
+        Camera cam = Camera.main;
+        float camHeight = cam.orthographicSize * 2;
+        float camWidth = camHeight * cam.aspect;
+
+        _whiteSprite = CreateWhiteSprite();
+
+        _infoAudio = gameObject.AddComponent<AudioSource>();
+
+        _darkOverlay = new GameObject("DarkOverlay");
+        _darkOverlay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 1);
+        _darkOverlay.transform.localScale = new Vector3(camWidth, camHeight, 1);
+        SpriteRenderer darkSR = _darkOverlay.AddComponent<SpriteRenderer>();
+        darkSR.color = Color.black;
+        darkSR.sprite = _whiteSprite;
+        darkSR.sortingOrder = 100;
+
+        _shapeDisplay = new GameObject("ShapeDisplay");
+        _shapeDisplay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 2);
+        _shapeDisplay.transform.localScale = new Vector3(6, 6, 1);
+        SpriteRenderer shapeSR = _shapeDisplay.AddComponent<SpriteRenderer>();
+        shapeSR.sortingOrder = 101;
+
+        _nameCanvas = new GameObject("NameCanvas");
+        _nameCanvas.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y - 3f, cam.transform.position.z + 2);
+        Canvas canvas = _nameCanvas.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.worldCamera = cam;
+        RectTransform canvasRect = _nameCanvas.GetComponent<RectTransform>();
+        canvasRect.sizeDelta = new Vector2(8, 2);
+
+        GameObject nameTextObj = new GameObject("NameText");
+        nameTextObj.transform.SetParent(_nameCanvas.transform, false);
+        Text nameText = nameTextObj.AddComponent<Text>();
+        nameText.alignment = TextAnchor.MiddleCenter;
+        nameText.fontSize = 80;
+        nameText.color = Color.white;
+        nameText.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 80);
+        RectTransform textRect = nameTextObj.GetComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+
+        _darkOverlay.SetActive(false);
+        _shapeDisplay.SetActive(false);
+        _nameCanvas.SetActive(false);
     }
 
-    System.Collections.IEnumerator MoveTo(Vector3 target, float duration)
+    Sprite CreateWhiteSprite()
     {
-        Vector3 start = transform.position;
-        float elapsed = 0;
-        while (elapsed < duration)
-        {
-            transform.position = Vector3.Lerp(start, target, elapsed / duration);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-        transform.position = target;
+        Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1);
     }
 
-    System.Collections.IEnumerator ScaleTo(Vector3 target, float duration)
+    void DismissInfo()
     {
-        Vector3 start = transform.localScale;
-        float elapsed = 0;
-        while (elapsed < duration)
+        _showingInfo = false;
+
+        if (_darkOverlay != null) _darkOverlay.SetActive(false);
+        if (_shapeDisplay != null) _shapeDisplay.SetActive(false);
+        if (_nameCanvas != null) _nameCanvas.SetActive(false);
+
+        foreach (var interaction in FindObjectsByType<ShapeInteraction>(FindObjectsSortMode.None))
         {
-            transform.localScale = Vector3.Lerp(start, target, elapsed / duration);
-            elapsed += Time.deltaTime;
-            yield return null;
+            if (interaction._rb != null)
+                interaction._rb.simulated = true;
         }
-        transform.localScale = target;
+    }
+
+    string CleanName(string name)
+    {
+        if (name.StartsWith("Square"))
+            return "Square";
+        return name;
     }
 }

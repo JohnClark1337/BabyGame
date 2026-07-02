@@ -28,3 +28,13 @@ Assets/AssetStoreTools*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Android build output
+*.apk
+
+# IL2CPP backup (generated during Android build)
+BabyGame_BackUpThisFolder_ButDontShipItWithYourGame/
+BabyGame_BurstDebugInformation_DoNotShip/
+
+# CMake build output
+.utmp/
