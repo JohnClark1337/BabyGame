@@ -423,6 +423,7 @@ UnityEngine.Canvas::get_renderingDisplaySize_Injected
 UnityEngine.Canvas::set_additionalShaderChannels_Injected
 UnityEngine.Canvas::set_overrideSorting_Injected
 UnityEngine.Canvas::set_referencePixelsPerUnit_Injected
+UnityEngine.Canvas::set_renderMode_Injected
 UnityEngine.Canvas::set_scaleFactor_Injected
 UnityEngine.Canvas::set_sortingLayerID_Injected
 UnityEngine.Canvas::set_sortingOrder_Injected
@@ -597,6 +598,7 @@ UnityEngine.Font::GetDefault_Injected
 UnityEngine.Font::get_material_Injected
 UnityEngine.Font::GetOSFallbacks
 UnityEngine.Font::GetPathsToOSFonts
+UnityEngine.Font::Internal_CreateDynamicFont
 UnityEngine.Font::Internal_CreateFont_Injected
 UnityEngine.FrameTimingManager::GetLatestTimings_Injected
 UnityEngine.FrameTimingManager::CaptureFrameTimings
@@ -1442,6 +1444,7 @@ UnityEngine.ResourcesAPIInternal::UnloadAsset_Injected
 UnityEngine.ResourcesAPIInternal::FindObjectsOfTypeAll
 UnityEngine.ResourcesAPIInternal::LoadAll_Injected
 UnityEngine.Rigidbody2D::get_localToWorldMatrix_Injected
+UnityEngine.Rigidbody2D::set_angularDamping_Injected
 UnityEngine.Rigidbody2D::set_angularVelocity_Injected
 UnityEngine.Rigidbody2D::set_freezeRotation_Injected
 UnityEngine.Rigidbody2D::set_gravityScale_Injected
@@ -1458,6 +1461,7 @@ UnityEngine.Screen::GetMSAASamples
 UnityEngine.Screen::get_height
 UnityEngine.Screen::get_width
 UnityEngine.Screen::get_dpi
+UnityEngine.Screen::RequestOrientation
 UnityEngine.Screen::SetMSAASamples
 UnityEngine.Screen::set_sleepTimeout
 UnityEngine.Screen::GetScreenOrientation

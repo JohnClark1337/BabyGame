@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using TMPro;
+using UnityEngine.UI;
 
 public enum ShapeType { Circle, Triangle, Square }
 
@@ -32,32 +32,50 @@ public class GameModeManager : MonoBehaviour
 
     void Start()
     {
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
         _whiteSprite = CreateWhiteSprite();
 
-        string[] shapeNames = { "Circle", "Triangle", "Square" };
-        Color[] shapeColors = {
-            new Color(0.2f, 0.5f, 0.9f, 1f),
-            new Color(0.9f, 0.3f, 0.2f, 1f),
-            new Color(0.2f, 0.8f, 0.3f, 1f),
-        };
-        ShapeType[] shapeTypes = { ShapeType.Circle, ShapeType.Triangle, ShapeType.Square };
+        RemoveOldWalls();
 
-        for (int i = 0; i < shapeNames.Length; i++)
+        (string name, Color color, ShapeType st)[] shapeDefs = {
+            ("Circle", new Color(0.2f, 0.5f, 0.9f, 1f), ShapeType.Circle),
+            ("Triangle", new Color(0.9f, 0.3f, 0.2f, 1f), ShapeType.Triangle),
+            ("Square (4)", new Color(0.2f, 0.8f, 0.3f, 1f), ShapeType.Square),
+        };
+
+        foreach (var (sName, sColor, sType) in shapeDefs)
         {
-            GameObject go = GameObject.Find(shapeNames[i]);
+            GameObject go = GameObject.Find(sName);
             if (go != null)
             {
                 SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+                Rigidbody2D rb = go.GetComponent<Rigidbody2D>();
                 if (sr != null)
+                    sr.sprite = GenerateShapeSprite(sType, sColor);
+                if (rb != null)
                 {
-                    sr.sprite = GenerateShapeSprite(shapeTypes[i], shapeColors[i]);
+                    rb.gravityScale = 0;
+                    rb.linearDamping = 1f;
+                    rb.angularDamping = 1f;
                 }
+                go.transform.localScale = Vector3.one;
                 _sceneShapes.Add(go);
             }
         }
 
         CreateModeButtons();
         ActivateShapes();
+    }
+
+    void RemoveOldWalls()
+    {
+        string[] oldWalls = { "Square", "Square (1)", "Square (2)", "Square (3)" };
+        foreach (string name in oldWalls)
+        {
+            GameObject go = GameObject.Find(name);
+            if (go != null)
+                Destroy(go);
+        }
     }
 
     public void RegenerateQuiz()
@@ -138,11 +156,26 @@ public class GameModeManager : MonoBehaviour
         BoxCollider2D col = obj.AddComponent<BoxCollider2D>();
         col.size = new Vector2(2, 2);
 
-        TextMeshPro tmp = obj.AddComponent<TextMeshPro>();
-        tmp.text = displayChar;
-        tmp.fontSize = 3;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color = Color.white;
+        GameObject labelGO = new GameObject("Label");
+        labelGO.transform.SetParent(obj.transform, false);
+        Canvas canvas = labelGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.worldCamera = cam;
+        canvas.sortingOrder = 10;
+        RectTransform cr = labelGO.GetComponent<RectTransform>();
+        cr.sizeDelta = new Vector2(2, 2);
+
+        Text text = labelGO.AddComponent<Text>();
+        text.text = displayChar;
+        text.fontSize = 120;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.color = Color.white;
+        text.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 120);
+        RectTransform tr = text.GetComponent<RectTransform>();
+        tr.anchorMin = Vector2.zero;
+        tr.anchorMax = Vector2.one;
+        tr.offsetMin = Vector2.zero;
+        tr.offsetMax = Vector2.zero;
 
         obj.AddComponent<BounceScript>();
         ShapeInteraction si = obj.AddComponent<ShapeInteraction>();
@@ -191,11 +224,18 @@ public class GameModeManager : MonoBehaviour
 
         GameObject promptGO = new GameObject("QuizPrompt");
         promptGO.transform.position = new Vector3(cam.transform.position.x, hh - 2f, -5);
-        TextMeshPro promptTMP = promptGO.AddComponent<TextMeshPro>();
-        promptTMP.text = $"Find the {correct.Name}!";
-        promptTMP.fontSize = 1.5f;
-        promptTMP.alignment = TextAlignmentOptions.Center;
-        promptTMP.color = Color.yellow;
+        Canvas pc = promptGO.AddComponent<Canvas>();
+        pc.renderMode = RenderMode.WorldSpace;
+        pc.worldCamera = cam;
+        pc.sortingOrder = 20;
+        RectTransform pr = promptGO.GetComponent<RectTransform>();
+        pr.sizeDelta = new Vector2(14, 2);
+        Text pt = promptGO.AddComponent<Text>();
+        pt.text = $"Find the {correct.Name}!";
+        pt.fontSize = 80;
+        pt.alignment = TextAnchor.MiddleCenter;
+        pt.color = Color.yellow;
+        pt.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 80);
         _dynamicObjects.Add(promptGO);
 
         foreach (var item in choices)
@@ -238,24 +278,43 @@ public class GameModeManager : MonoBehaviour
             ("?", GameMode.Quiz),
         };
 
+        float totalW = hw * 2;
+        float btnSize = Mathf.Min(2.5f, totalW / (btns.Length + 1));
+        float spacing = (totalW - btnSize) / btns.Length;
+        float startX = -hw + spacing / 2;
+
         for (int i = 0; i < btns.Length; i++)
         {
             GameObject btn = new GameObject($"Btn_{btns[i].label}");
-            float x = -hw + 1.5f + i * 3f;
-            float y = hh - 1.5f;
+            float x = startX + i * spacing;
+            float y = hh - btnSize / 2 - 0.3f;
             btn.transform.position = new Vector3(x, y, -5);
-            btn.transform.localScale = new Vector3(2.5f, 2.5f, 1);
+            btn.transform.localScale = new Vector3(btnSize, btnSize, 1);
 
             SpriteRenderer sr = btn.AddComponent<SpriteRenderer>();
             sr.sprite = _whiteSprite;
             sr.color = new Color(0.15f, 0.15f, 0.5f, 0.85f);
             sr.sortingOrder = 60;
 
-            TextMeshPro tmp = btn.AddComponent<TextMeshPro>();
-            tmp.text = btns[i].label;
-            tmp.fontSize = 1.5f;
-            tmp.alignment = TextAlignmentOptions.Center;
-            tmp.color = Color.white;
+            GameObject lgo = new GameObject("Label");
+            lgo.transform.SetParent(btn.transform, false);
+            Canvas lc = lgo.AddComponent<Canvas>();
+            lc.renderMode = RenderMode.WorldSpace;
+            lc.worldCamera = cam;
+            lc.sortingOrder = 61;
+            RectTransform lr = lgo.GetComponent<RectTransform>();
+            lr.sizeDelta = new Vector2(1.5f, 1.5f);
+            Text lt = lgo.AddComponent<Text>();
+            lt.text = btns[i].label;
+            lt.fontSize = 80;
+            lt.alignment = TextAnchor.MiddleCenter;
+            lt.color = Color.white;
+            lt.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 80);
+            RectTransform tr = lt.GetComponent<RectTransform>();
+            tr.anchorMin = Vector2.zero;
+            tr.anchorMax = Vector2.one;
+            tr.offsetMin = Vector2.zero;
+            tr.offsetMax = Vector2.zero;
 
             BoxCollider2D col = btn.AddComponent<BoxCollider2D>();
             col.size = Vector2.one;
@@ -281,6 +340,14 @@ public class GameModeManager : MonoBehaviour
                 sr.color = active ? new Color(0.3f, 0.3f, 0.7f, 1f) : new Color(0.15f, 0.15f, 0.5f, 0.85f);
             }
         }
+    }
+
+    static Sprite CreateWhiteSprite()
+    {
+        Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1);
     }
 
     static Sprite GenerateShapeSprite(ShapeType type, Color color)
@@ -331,14 +398,6 @@ public class GameModeManager : MonoBehaviour
     static float Sign(float px, float py, float x1, float y1, float x2, float y2)
     {
         return (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2);
-    }
-
-    static Sprite CreateWhiteSprite()
-    {
-        Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-        tex.SetPixel(0, 0, Color.white);
-        tex.Apply();
-        return Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1);
     }
 
     struct QuizItem

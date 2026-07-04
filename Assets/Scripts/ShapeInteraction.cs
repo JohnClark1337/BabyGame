@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
+using UnityEngine.UI;
 
 public class ShapeInteraction : MonoBehaviour
 {
@@ -20,8 +20,8 @@ public class ShapeInteraction : MonoBehaviour
     private static int _infoShownFrame = -1;
     private static GameObject _darkOverlay;
     private static GameObject _shapeDisplay;
-    private static TextMeshPro _charText;
-    private static TextMeshPro _nameText;
+    private static Text _charText;
+    private static Text _nameText;
     private static AudioSource _infoAudio;
     private static Sprite _whiteSprite;
 
@@ -124,7 +124,7 @@ public class ShapeInteraction : MonoBehaviour
             _shapeDisplay.SetActive(false);
             _charText.gameObject.SetActive(true);
             _charText.text = displayCharacter;
-            _charText.fontSize = 6;
+            _charText.fontSize = 300;
             _charText.color = Color.white;
         }
         else
@@ -153,7 +153,7 @@ public class ShapeInteraction : MonoBehaviour
         _nameText.gameObject.SetActive(false);
         _charText.text = message;
         _charText.color = color;
-        _charText.fontSize = 3;
+        _charText.fontSize = 200;
     }
 
     void CreateOverlayObjects()
@@ -182,13 +182,13 @@ public class ShapeInteraction : MonoBehaviour
         SpriteRenderer shapeSR = _shapeDisplay.AddComponent<SpriteRenderer>();
         shapeSR.sortingOrder = 101;
 
-        _charText = CreateTMPText("CharText",
+        _charText = CreateCanvasText("CharText",
             new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 2),
-            6, Color.white, TextAlignmentOptions.Center);
+            new Vector2(12, 10), 300, Color.white, cam, 102);
 
-        _nameText = CreateTMPText("NameText",
+        _nameText = CreateCanvasText("NameText",
             new Vector3(cam.transform.position.x, cam.transform.position.y - 3f, cam.transform.position.z + 2),
-            1.5f, Color.white, TextAlignmentOptions.Center);
+            new Vector2(8, 2), 80, Color.white, cam, 102);
 
         _darkOverlay.SetActive(false);
         _shapeDisplay.SetActive(false);
@@ -196,16 +196,30 @@ public class ShapeInteraction : MonoBehaviour
         _nameText.gameObject.SetActive(false);
     }
 
-    TextMeshPro CreateTMPText(string name, Vector3 position, float fontSize, Color color,
-        TextAlignmentOptions align)
+    Text CreateCanvasText(string name, Vector3 position, Vector2 sizeDelta, int fontSize, Color color,
+        Camera cam, int sortingOrder)
     {
         GameObject go = new GameObject(name);
         go.transform.position = position;
-        TextMeshPro tmp = go.AddComponent<TextMeshPro>();
-        tmp.fontSize = fontSize;
-        tmp.color = color;
-        tmp.alignment = align;
-        return tmp;
+        Canvas c = go.AddComponent<Canvas>();
+        c.renderMode = RenderMode.WorldSpace;
+        c.worldCamera = cam;
+        c.sortingOrder = sortingOrder;
+        RectTransform cr = go.GetComponent<RectTransform>();
+        cr.sizeDelta = sizeDelta;
+
+        Text t = go.AddComponent<Text>();
+        t.fontSize = fontSize;
+        t.color = color;
+        t.alignment = TextAnchor.MiddleCenter;
+        t.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", fontSize);
+        RectTransform tr = t.GetComponent<RectTransform>();
+        tr.anchorMin = Vector2.zero;
+        tr.anchorMax = Vector2.one;
+        tr.offsetMin = Vector2.zero;
+        tr.offsetMax = Vector2.zero;
+
+        return t;
     }
 
     Sprite CreateWhiteSprite()
