@@ -7,6 +7,8 @@
 
 
 
+extern void EmbeddedAttribute__ctor_mD1F1EF0EB61F129446D60FB364EF88BC80AAE4F9 (void);
+extern void RefSafetyRulesAttribute__ctor_m1C4F824B010FB2AE4A0E74431DC0F0B8B91A0D9E (void);
 extern void SpriteShapeSegment_set_geomIndex_m14DE47F211B8A0689AE1CBD62C3A1EEFF0605E25 (void);
 extern void SpriteShapeSegment_get_indexCount_mB1823401E991934E00A50147D40297C300AF456A (void);
 extern void SpriteShapeSegment_set_indexCount_m28732D6B993D21A6327A1A0CEC2AA9EDCCA2C4A1 (void);
@@ -34,8 +36,10 @@ extern void SpriteShapeRenderer_GetDataInfo_Injected_mC6251133ED4834D29B479EF13B
 extern void SpriteShapeRenderer_GetChannelInfo_Injected_m027D34C874A1A16F2BB36E548C887AF5B62BDCF2 (void);
 extern void SpriteShapeRenderer_SetLocalAABB_Injected_m4D381B8A76DF76FB7AA8A52D44C8EB2802B19124 (void);
 extern void SpriteShapeRenderer_GetSplineMeshCount_Injected_m8EB1F051BF5101331D1E585EBE5CF54B71D439CA (void);
-static Il2CppMethodPointer s_methodPointers[29] = 
+static Il2CppMethodPointer s_methodPointers[31] = 
 {
+	EmbeddedAttribute__ctor_mD1F1EF0EB61F129446D60FB364EF88BC80AAE4F9,
+	RefSafetyRulesAttribute__ctor_m1C4F824B010FB2AE4A0E74431DC0F0B8B91A0D9E,
 	SpriteShapeSegment_set_geomIndex_m14DE47F211B8A0689AE1CBD62C3A1EEFF0605E25,
 	SpriteShapeSegment_get_indexCount_mB1823401E991934E00A50147D40297C300AF456A,
 	SpriteShapeSegment_set_indexCount_m28732D6B993D21A6327A1A0CEC2AA9EDCCA2C4A1,
@@ -74,49 +78,51 @@ extern void SpriteShapeSegment_set_vertexCount_mFF8D13BF27EC6010581D458BB131F118
 extern void SpriteShapeSegment_set_spriteIndex_mDAFA4E1F6BB47EE7540C6CD46CC5376652DADC13_AdjustorThunk (void);
 static Il2CppTokenAdjustorThunkPair s_adjustorThunks[6] = 
 {
-	{ 0x06000001, SpriteShapeSegment_set_geomIndex_m14DE47F211B8A0689AE1CBD62C3A1EEFF0605E25_AdjustorThunk },
-	{ 0x06000002, SpriteShapeSegment_get_indexCount_mB1823401E991934E00A50147D40297C300AF456A_AdjustorThunk },
-	{ 0x06000003, SpriteShapeSegment_set_indexCount_m28732D6B993D21A6327A1A0CEC2AA9EDCCA2C4A1_AdjustorThunk },
-	{ 0x06000004, SpriteShapeSegment_get_vertexCount_m7FAC6E2254D9AC12C0293E26EEC5BE64832F7381_AdjustorThunk },
-	{ 0x06000005, SpriteShapeSegment_set_vertexCount_mFF8D13BF27EC6010581D458BB131F118EF52A0F3_AdjustorThunk },
-	{ 0x06000006, SpriteShapeSegment_set_spriteIndex_mDAFA4E1F6BB47EE7540C6CD46CC5376652DADC13_AdjustorThunk },
+	{ 0x06000003, SpriteShapeSegment_set_geomIndex_m14DE47F211B8A0689AE1CBD62C3A1EEFF0605E25_AdjustorThunk },
+	{ 0x06000004, SpriteShapeSegment_get_indexCount_mB1823401E991934E00A50147D40297C300AF456A_AdjustorThunk },
+	{ 0x06000005, SpriteShapeSegment_set_indexCount_m28732D6B993D21A6327A1A0CEC2AA9EDCCA2C4A1_AdjustorThunk },
+	{ 0x06000006, SpriteShapeSegment_get_vertexCount_m7FAC6E2254D9AC12C0293E26EEC5BE64832F7381_AdjustorThunk },
+	{ 0x06000007, SpriteShapeSegment_set_vertexCount_mFF8D13BF27EC6010581D458BB131F118EF52A0F3_AdjustorThunk },
+	{ 0x06000008, SpriteShapeSegment_set_spriteIndex_mDAFA4E1F6BB47EE7540C6CD46CC5376652DADC13_AdjustorThunk },
 };
-static const int32_t s_InvokerIndices[29] = 
+static const int32_t s_InvokerIndices[31] = 
 {
-	10807,
-	14140,
-	10807,
-	14140,
-	10807,
-	10807,
-	2287,
+	10896,
+	8109,
+	8109,
+	10575,
+	8109,
+	10575,
+	8109,
+	8109,
+	2194,
 	-1,
 	-1,
-	10807,
-	4929,
-	2244,
-	9452,
-	9452,
-	10677,
-	14140,
-	12928,
-	5969,
-	1529,
-	752,
-	14417,
-	17225,
-	20957,
-	18884,
-	17236,
-	18880,
-	18880,
-	20954,
-	23381,
+	8109,
+	3918,
+	2156,
+	7312,
+	7312,
+	7964,
+	10575,
+	10216,
+	4742,
+	1571,
+	799,
+	10896,
+	13189,
+	15289,
+	14141,
+	13202,
+	14137,
+	14137,
+	15286,
+	15887,
 };
 static const Il2CppTokenRangePair s_rgctxIndices[2] = 
 {
-	{ 0x06000008, { 0, 2 } },
-	{ 0x06000009, { 2, 2 } },
+	{ 0x0600000A, { 0, 2 } },
+	{ 0x0600000B, { 2, 2 } },
 };
 extern const uint32_t g_rgctx_NativeArrayUnsafeUtility_ConvertExistingDataToNativeArray_TisT_t5BC1F8928A1B35AC768A2C4B0239C04CEDA1FD56_mE6BDF655A67788463021A6D09555A3B92E856D7B;
 extern const uint32_t g_rgctx_NativeArray_1_t669037BF55DFB05FFC88EED828421A071607779E;
@@ -133,7 +139,7 @@ IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_SpriteShapeModule_CodeGe
 const Il2CppCodeGenModule g_UnityEngine_SpriteShapeModule_CodeGenModule = 
 {
 	"UnityEngine.SpriteShapeModule.dll",
-	29,
+	31,
 	s_methodPointers,
 	6,
 	s_adjustorThunks,

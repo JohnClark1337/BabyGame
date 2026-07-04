@@ -7,6 +7,8 @@
 
 
 
+extern void EmbeddedAttribute__ctor_mCED6CE7A8D963926C3D5EEAFE8051C77C03C5A2A (void);
+extern void RefSafetyRulesAttribute__ctor_mF9D3E7F6A1C0CB8F2543AC85623AF45FCE9852AC (void);
 extern void TextGenerationSettings_CompareColors_m29E454405FB3871CA77CC7F94DAB1B4320BD5E53 (void);
 extern void TextGenerationSettings_CompareVector2_mF3EE374922B2ECE13BA7B01B26199494A30C2E2E (void);
 extern void TextGenerationSettings_Equals_m04DE9655555622E3A4EECC2EAB3BC36B38E20840 (void);
@@ -36,16 +38,16 @@ extern void TextGenerator_Internal_Create_m66701C08DAE160892766930F831D2AB1EB4E9
 extern void TextGenerator_Internal_Destroy_m0AE3865A6886503BAE5798E6D9899EF59A0285A7 (void);
 extern void TextGenerator_Populate_Internal_m74A216D58183B4069BFBD6CDF624CB97A9EC4CAA (void);
 extern void TextGenerator_Populate_Internal_m4DF908756A1AC26B04AC8AB12A004203366B294B (void);
-extern void TextGenerator_GetVerticesInternal_m8BB7AB760D1071709A584FD9371D7549DA2A1B21 (void);
-extern void TextGenerator_GetCharactersInternal_mB5157BBD4E1C42ACEDCC696D718E656BDD5E2398 (void);
-extern void TextGenerator_GetLinesInternal_mDAC83E88FD1FD79CCCE294E49E02ED748CFC8E12 (void);
+extern void TextGenerator_GetVerticesInternal_mCE12DA48F71849AA7753F860D471B3EF95DC3B94 (void);
+extern void TextGenerator_GetCharactersInternal_mB9EC4F71D42A906352AC85ECD91E6B9599C87285 (void);
+extern void TextGenerator_GetLinesInternal_mC40DA7BA0283C1BC05355980A0AF6DE184690BDE (void);
 extern void TextGenerator_get_rectExtents_Injected_mE70DFB2720C23AD997733158D7BD220BFC30C06E (void);
 extern void TextGenerator_get_characterCount_Injected_m85C7A016C1F680A2BD6585235CC8858B0C718CB8 (void);
 extern void TextGenerator_get_lineCount_Injected_mF2C9067B7A2E5466BE99F6A9104F2FBCB36761AF (void);
 extern void TextGenerator_Populate_Internal_Injected_m79206EFC5017F0450703B7B246C0C0DE1F23B8E7 (void);
-extern void TextGenerator_GetVerticesInternal_Injected_mDF2ACA7C58E4055EA2A1C696C7B5D321B36D6E95 (void);
-extern void TextGenerator_GetCharactersInternal_Injected_m007C3E062501293E5D4969D51689224CD6C5AB65 (void);
-extern void TextGenerator_GetLinesInternal_Injected_m6B6CFC076A64DF1E7250EB5C32A0A126FDD6AF2E (void);
+extern void TextGenerator_GetVerticesInternal_Injected_m167ECC9C667FD35B58096DC9521DBE663889742C (void);
+extern void TextGenerator_GetCharactersInternal_Injected_m52E53C604F7AACD289E63D6BE8EFE8A58B613C93 (void);
+extern void TextGenerator_GetLinesInternal_Injected_m1C6294B53B064FB5AF384182951F0E40BCA4F917 (void);
 extern void BindingsMarshaller_ConvertToNative_m442CA777D48EC9F618E6EDACB4F95565D8717650 (void);
 extern void TextMesh_set_text_mDF79D39638ED82797D0B0B3BB9E6B10712F8EA9E (void);
 extern void TextMesh_get_font_m94D3A4C8E4DB171B74E4FF00AC7EC27F3D495664 (void);
@@ -70,6 +72,7 @@ extern void Font_get_dynamic_m5231258BFEAABA3B3EA6AB5D8C2FDCBC2AD1371C (void);
 extern void Font_get_fontSize_m02C2F5C7A7C89A878F04C2087248DD46BBF9E26B (void);
 extern void Font__ctor_m9106C7F312AE77F6721001A5A3143951201AC841 (void);
 extern void Font_InvokeTextureRebuilt_Internal_m874D1025267C908E5FCD437B41929E4DE248B01B (void);
+extern void Font_GetDefault_m93A1C993B4D5B93D1F5A334A4F1407B4C1DA4DC6 (void);
 extern void Font_HasCharacter_m71A84FE036055880E1543D79A38FEFA495AD200B (void);
 extern void Font_HasCharacter_mAB838A26F002CB5E4B4DB297F7D6836A28625B18 (void);
 extern void Font_GetPathsToOSFonts_mF2EB5A086E0313B02C22666C9C0E980FE0EB60B8 (void);
@@ -78,12 +81,15 @@ extern void Font_Internal_CreateFont_m97CB036BAA033DDAD87E14F9D3493A3A2D9C72B1 (
 extern void Font_get_material_Injected_mFD3477FFA6CA61152AC98B142DFE004137D231F7 (void);
 extern void Font_get_dynamic_Injected_mE1610EDFBB9092E562D21E9FC5A4AAFA89696690 (void);
 extern void Font_get_fontSize_Injected_m34A9893F1D744CC3CE823AE7BF0902957C8A268E (void);
+extern void Font_GetDefault_Injected_m05B5D4A46A7C5D8988B952D892482D4C5BA56D5B (void);
 extern void Font_HasCharacter_Injected_mCCBE7842CC556C3C1693FA8148B1928B5321151B (void);
 extern void Font_Internal_CreateFont_Injected_mCE3C0EE5FA346C2703391929A1D88ABC1B2A10FA (void);
 extern void FontTextureRebuildCallback__ctor_m1AF27FC83F3136E493F47015F99CE7A4E6BCA0BC (void);
 extern void FontTextureRebuildCallback_Invoke_m8B52C3F4823ADBB80062209E6BA2B33202AE958D (void);
-static Il2CppMethodPointer s_methodPointers[75] = 
+static Il2CppMethodPointer s_methodPointers[79] = 
 {
+	EmbeddedAttribute__ctor_mCED6CE7A8D963926C3D5EEAFE8051C77C03C5A2A,
+	RefSafetyRulesAttribute__ctor_mF9D3E7F6A1C0CB8F2543AC85623AF45FCE9852AC,
 	TextGenerationSettings_CompareColors_m29E454405FB3871CA77CC7F94DAB1B4320BD5E53,
 	TextGenerationSettings_CompareVector2_mF3EE374922B2ECE13BA7B01B26199494A30C2E2E,
 	TextGenerationSettings_Equals_m04DE9655555622E3A4EECC2EAB3BC36B38E20840,
@@ -113,16 +119,16 @@ static Il2CppMethodPointer s_methodPointers[75] =
 	TextGenerator_Internal_Destroy_m0AE3865A6886503BAE5798E6D9899EF59A0285A7,
 	TextGenerator_Populate_Internal_m74A216D58183B4069BFBD6CDF624CB97A9EC4CAA,
 	TextGenerator_Populate_Internal_m4DF908756A1AC26B04AC8AB12A004203366B294B,
-	TextGenerator_GetVerticesInternal_m8BB7AB760D1071709A584FD9371D7549DA2A1B21,
-	TextGenerator_GetCharactersInternal_mB5157BBD4E1C42ACEDCC696D718E656BDD5E2398,
-	TextGenerator_GetLinesInternal_mDAC83E88FD1FD79CCCE294E49E02ED748CFC8E12,
+	TextGenerator_GetVerticesInternal_mCE12DA48F71849AA7753F860D471B3EF95DC3B94,
+	TextGenerator_GetCharactersInternal_mB9EC4F71D42A906352AC85ECD91E6B9599C87285,
+	TextGenerator_GetLinesInternal_mC40DA7BA0283C1BC05355980A0AF6DE184690BDE,
 	TextGenerator_get_rectExtents_Injected_mE70DFB2720C23AD997733158D7BD220BFC30C06E,
 	TextGenerator_get_characterCount_Injected_m85C7A016C1F680A2BD6585235CC8858B0C718CB8,
 	TextGenerator_get_lineCount_Injected_mF2C9067B7A2E5466BE99F6A9104F2FBCB36761AF,
 	TextGenerator_Populate_Internal_Injected_m79206EFC5017F0450703B7B246C0C0DE1F23B8E7,
-	TextGenerator_GetVerticesInternal_Injected_mDF2ACA7C58E4055EA2A1C696C7B5D321B36D6E95,
-	TextGenerator_GetCharactersInternal_Injected_m007C3E062501293E5D4969D51689224CD6C5AB65,
-	TextGenerator_GetLinesInternal_Injected_m6B6CFC076A64DF1E7250EB5C32A0A126FDD6AF2E,
+	TextGenerator_GetVerticesInternal_Injected_m167ECC9C667FD35B58096DC9521DBE663889742C,
+	TextGenerator_GetCharactersInternal_Injected_m52E53C604F7AACD289E63D6BE8EFE8A58B613C93,
+	TextGenerator_GetLinesInternal_Injected_m1C6294B53B064FB5AF384182951F0E40BCA4F917,
 	BindingsMarshaller_ConvertToNative_m442CA777D48EC9F618E6EDACB4F95565D8717650,
 	TextMesh_set_text_mDF79D39638ED82797D0B0B3BB9E6B10712F8EA9E,
 	TextMesh_get_font_m94D3A4C8E4DB171B74E4FF00AC7EC27F3D495664,
@@ -147,6 +153,7 @@ static Il2CppMethodPointer s_methodPointers[75] =
 	Font_get_fontSize_m02C2F5C7A7C89A878F04C2087248DD46BBF9E26B,
 	Font__ctor_m9106C7F312AE77F6721001A5A3143951201AC841,
 	Font_InvokeTextureRebuilt_Internal_m874D1025267C908E5FCD437B41929E4DE248B01B,
+	Font_GetDefault_m93A1C993B4D5B93D1F5A334A4F1407B4C1DA4DC6,
 	Font_HasCharacter_m71A84FE036055880E1543D79A38FEFA495AD200B,
 	Font_HasCharacter_mAB838A26F002CB5E4B4DB297F7D6836A28625B18,
 	Font_GetPathsToOSFonts_mF2EB5A086E0313B02C22666C9C0E980FE0EB60B8,
@@ -155,6 +162,7 @@ static Il2CppMethodPointer s_methodPointers[75] =
 	Font_get_material_Injected_mFD3477FFA6CA61152AC98B142DFE004137D231F7,
 	Font_get_dynamic_Injected_mE1610EDFBB9092E562D21E9FC5A4AAFA89696690,
 	Font_get_fontSize_Injected_m34A9893F1D744CC3CE823AE7BF0902957C8A268E,
+	Font_GetDefault_Injected_m05B5D4A46A7C5D8988B952D892482D4C5BA56D5B,
 	Font_HasCharacter_Injected_mCCBE7842CC556C3C1693FA8148B1928B5321151B,
 	Font_Internal_CreateFont_Injected_mCE3C0EE5FA346C2703391929A1D88ABC1B2A10FA,
 	FontTextureRebuildCallback__ctor_m1AF27FC83F3136E493F47015F99CE7A4E6BCA0BC,
@@ -165,93 +173,97 @@ extern void TextGenerationSettings_CompareVector2_mF3EE374922B2ECE13BA7B01B26199
 extern void TextGenerationSettings_Equals_m04DE9655555622E3A4EECC2EAB3BC36B38E20840_AdjustorThunk (void);
 static Il2CppTokenAdjustorThunkPair s_adjustorThunks[3] = 
 {
-	{ 0x06000001, TextGenerationSettings_CompareColors_m29E454405FB3871CA77CC7F94DAB1B4320BD5E53_AdjustorThunk },
-	{ 0x06000002, TextGenerationSettings_CompareVector2_mF3EE374922B2ECE13BA7B01B26199494A30C2E2E_AdjustorThunk },
-	{ 0x06000003, TextGenerationSettings_Equals_m04DE9655555622E3A4EECC2EAB3BC36B38E20840_AdjustorThunk },
+	{ 0x06000003, TextGenerationSettings_CompareColors_m29E454405FB3871CA77CC7F94DAB1B4320BD5E53_AdjustorThunk },
+	{ 0x06000004, TextGenerationSettings_CompareVector2_mF3EE374922B2ECE13BA7B01B26199494A30C2E2E_AdjustorThunk },
+	{ 0x06000005, TextGenerationSettings_Equals_m04DE9655555622E3A4EECC2EAB3BC36B38E20840_AdjustorThunk },
 };
-static const int32_t s_InvokerIndices[75] = 
+static const int32_t s_InvokerIndices[79] = 
 {
-	3202,
-	3465,
-	7805,
-	14417,
-	10807,
-	14417,
-	14417,
-	14140,
-	9532,
-	14417,
-	10868,
-	10868,
-	10868,
-	4130,
-	4130,
-	1866,
-	3336,
-	3786,
-	3786,
-	14201,
-	14201,
-	14201,
-	14253,
-	14140,
-	14140,
-	25036,
-	23896,
-	4,
-	8,
-	10868,
-	10868,
-	10868,
-	20954,
-	23381,
-	23381,
-	14684,
-	20959,
-	20959,
-	20959,
-	23438,
-	10868,
-	14201,
-	10868,
-	10807,
-	10807,
-	14020,
-	10685,
-	14417,
-	20954,
-	23437,
-	20958,
-	20957,
-	20957,
-	20954,
-	20954,
-	25137,
-	23898,
-	23898,
-	14201,
-	14014,
-	14140,
-	14417,
-	23898,
-	7833,
-	7596,
-	25052,
-	25052,
-	21160,
-	23437,
-	23211,
-	23381,
-	19745,
-	21141,
-	5424,
-	14417,
+	10896,
+	8109,
+	2445,
+	2686,
+	5735,
+	10896,
+	8109,
+	10896,
+	10896,
+	10575,
+	7394,
+	10896,
+	7935,
+	7935,
+	7935,
+	3261,
+	3261,
+	1729,
+	2415,
+	2883,
+	2883,
+	10405,
+	10405,
+	10405,
+	10718,
+	10575,
+	10575,
+	16583,
+	16295,
+	5,
+	11,
+	7935,
+	7935,
+	7935,
+	15286,
+	15887,
+	15887,
+	11175,
+	15286,
+	15286,
+	15286,
+	15929,
+	7935,
+	10405,
+	7935,
+	8109,
+	8109,
+	10439,
+	7972,
+	10896,
+	15286,
+	15936,
+	15290,
+	15289,
+	15289,
+	15286,
+	15286,
+	16707,
+	16280,
+	16280,
+	10405,
+	10435,
+	10575,
+	10896,
+	16280,
+	16530,
+	5764,
+	5502,
+	16530,
+	16530,
+	15222,
+	15936,
+	15727,
+	15887,
+	16583,
+	14532,
+	15222,
+	3393,
+	10896,
 };
 IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_TextRenderingModule_CodeGenModule;
 const Il2CppCodeGenModule g_UnityEngine_TextRenderingModule_CodeGenModule = 
 {
 	"UnityEngine.TextRenderingModule.dll",
-	75,
+	79,
 	s_methodPointers,
 	3,
 	s_adjustorThunks,

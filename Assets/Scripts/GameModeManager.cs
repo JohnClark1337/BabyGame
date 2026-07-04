@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
+using TMPro;
+
+public enum ShapeType { Circle, Triangle, Square }
 
 public enum GameMode { Shapes, Numbers, Letters, Quiz }
 
@@ -32,14 +34,35 @@ public class GameModeManager : MonoBehaviour
     {
         _whiteSprite = CreateWhiteSprite();
 
-        foreach (string name in new[] { "Circle", "Triangle", "Square" })
+        string[] shapeNames = { "Circle", "Triangle", "Square" };
+        Color[] shapeColors = {
+            new Color(0.2f, 0.5f, 0.9f, 1f),
+            new Color(0.9f, 0.3f, 0.2f, 1f),
+            new Color(0.2f, 0.8f, 0.3f, 1f),
+        };
+        ShapeType[] shapeTypes = { ShapeType.Circle, ShapeType.Triangle, ShapeType.Square };
+
+        for (int i = 0; i < shapeNames.Length; i++)
         {
-            GameObject go = GameObject.Find(name);
-            if (go != null) _sceneShapes.Add(go);
+            GameObject go = GameObject.Find(shapeNames[i]);
+            if (go != null)
+            {
+                SpriteRenderer sr = go.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    sr.sprite = GenerateShapeSprite(shapeTypes[i], shapeColors[i]);
+                }
+                _sceneShapes.Add(go);
+            }
         }
 
         CreateModeButtons();
         ActivateShapes();
+    }
+
+    public void RegenerateQuiz()
+    {
+        SetMode(GameMode.Quiz);
     }
 
     public void SetMode(GameMode mode)
@@ -95,7 +118,7 @@ public class GameModeManager : MonoBehaviour
             _dynamicObjects.Add(CreateBouncer(c.ToString(), c.ToString()));
     }
 
-    GameObject CreateBouncer(string displayChar, string name)
+    GameObject CreateBouncer(string displayChar, string name, bool isQuiz = false, bool isCorrect = false)
     {
         Camera cam = Camera.main;
         float hh = cam.orthographicSize;
@@ -115,31 +138,19 @@ public class GameModeManager : MonoBehaviour
         BoxCollider2D col = obj.AddComponent<BoxCollider2D>();
         col.size = new Vector2(2, 2);
 
-        GameObject labelGO = new GameObject("Label");
-        labelGO.transform.SetParent(obj.transform, false);
-        Canvas canvas = labelGO.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.WorldSpace;
-        canvas.worldCamera = cam;
-        RectTransform cr = labelGO.GetComponent<RectTransform>();
-        cr.sizeDelta = new Vector2(2, 2);
-
-        Text text = labelGO.AddComponent<Text>();
-        text.text = displayChar;
-        text.fontSize = 120;
-        text.alignment = TextAnchor.MiddleCenter;
-        text.color = Color.white;
-        text.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 120);
-        RectTransform tr = text.GetComponent<RectTransform>();
-        tr.anchorMin = Vector2.zero;
-        tr.anchorMax = Vector2.one;
-        tr.offsetMin = Vector2.zero;
-        tr.offsetMax = Vector2.zero;
+        TextMeshPro tmp = obj.AddComponent<TextMeshPro>();
+        tmp.text = displayChar;
+        tmp.fontSize = 3;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = Color.white;
 
         obj.AddComponent<BounceScript>();
         ShapeInteraction si = obj.AddComponent<ShapeInteraction>();
         si.isCharacter = true;
         si.displayCharacter = displayChar;
         si.characterName = name;
+        si.isQuizTarget = isQuiz;
+        si.isCorrectAnswer = isCorrect;
 
         return obj;
     }
@@ -150,84 +161,62 @@ public class GameModeManager : MonoBehaviour
         float hh = cam.orthographicSize;
         float hw = hh * cam.aspect;
 
-        QuizItem[] items = GenerateQuizItems(3);
-        int correctIdx = Random.Range(0, items.Length);
+        QuizItem[] pool = GenerateQuizPool();
 
-        GameObject qGO = new GameObject("QuizPrompt");
-        qGO.transform.position = new Vector3(cam.transform.position.x, hh - 3f, -5);
-        Canvas qc = qGO.AddComponent<Canvas>();
-        qc.renderMode = RenderMode.WorldSpace;
-        qc.worldCamera = cam;
-        RectTransform qr = qGO.GetComponent<RectTransform>();
-        qr.sizeDelta = new Vector2(14, 2);
-        Text qt = qGO.AddComponent<Text>();
-        qt.text = $"Find the {items[correctIdx].Name}!";
-        qt.fontSize = 80;
-        qt.alignment = TextAnchor.MiddleCenter;
-        qt.color = Color.yellow;
-        qt.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 80);
-        _dynamicObjects.Add(qGO);
+        int correctIdx = Random.Range(0, pool.Length);
+        QuizItem correct = pool[correctIdx];
 
-        for (int i = 0; i < items.Length; i++)
+        List<QuizItem> distractors = new List<QuizItem>();
+        for (int i = 0; i < pool.Length; i++)
+            if (i != correctIdx) distractors.Add(pool[i]);
+
+        for (int i = 0; i < distractors.Count; i++)
         {
-            int idx = i;
-            GameObject choice = new GameObject($"Choice_{items[i].DisplayChar}");
-            float x = i == 0 ? -4f : (i == 1 ? 0f : 4f);
-            float y = -hh + 4f;
-            choice.transform.position = new Vector3(x, y, -5);
-            choice.transform.localScale = new Vector3(3, 3, 1);
+            var t = distractors[i];
+            int j = Random.Range(i, distractors.Count);
+            distractors[i] = distractors[j];
+            distractors[j] = t;
+        }
 
-            SpriteRenderer bg = choice.AddComponent<SpriteRenderer>();
-            bg.sprite = _whiteSprite;
-            bg.color = new Color(0.3f, 0.3f, 0.6f, 0.9f);
-            bg.sortingOrder = 50;
+        List<QuizItem> choices = new List<QuizItem> { correct };
+        choices.AddRange(distractors.GetRange(0, 4));
 
-            GameObject lgo = new GameObject("Label");
-            lgo.transform.SetParent(choice.transform, false);
-            Canvas lc = lgo.AddComponent<Canvas>();
-            lc.renderMode = RenderMode.WorldSpace;
-            lc.worldCamera = cam;
-            RectTransform lr = lgo.GetComponent<RectTransform>();
-            lr.sizeDelta = new Vector2(2.5f, 2.5f);
-            Text lt = lgo.AddComponent<Text>();
-            lt.text = items[i].DisplayChar;
-            lt.fontSize = 150;
-            lt.alignment = TextAnchor.MiddleCenter;
-            lt.color = Color.white;
-            lt.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 150);
+        for (int i = 0; i < choices.Count; i++)
+        {
+            var t = choices[i];
+            int j = Random.Range(i, choices.Count);
+            choices[i] = choices[j];
+            choices[j] = t;
+        }
 
-            BoxCollider2D col = choice.AddComponent<BoxCollider2D>();
-            col.size = Vector2.one;
+        GameObject promptGO = new GameObject("QuizPrompt");
+        promptGO.transform.position = new Vector3(cam.transform.position.x, hh - 2f, -5);
+        TextMeshPro promptTMP = promptGO.AddComponent<TextMeshPro>();
+        promptTMP.text = $"Find the {correct.Name}!";
+        promptTMP.fontSize = 1.5f;
+        promptTMP.alignment = TextAlignmentOptions.Center;
+        promptTMP.color = Color.yellow;
+        _dynamicObjects.Add(promptGO);
 
-            QuizChoice qc2 = choice.AddComponent<QuizChoice>();
-            qc2.isCorrect = (idx == correctIdx);
-
-            _dynamicObjects.Add(choice);
+        foreach (var item in choices)
+        {
+            _dynamicObjects.Add(CreateBouncer(
+                item.DisplayChar, item.Name,
+                true, item.DisplayChar == correct.DisplayChar && item.Name == correct.Name));
         }
     }
 
-    QuizItem[] GenerateQuizItems(int count)
+    QuizItem[] GenerateQuizPool()
     {
         List<QuizItem> pool = new List<QuizItem>();
-        pool.Add(new QuizItem { DisplayChar = "\u25CB", Name = "Circle" });
-        pool.Add(new QuizItem { DisplayChar = "\u25B3", Name = "Triangle" });
-        pool.Add(new QuizItem { DisplayChar = "\u25A1", Name = "Square" });
+        pool.Add(new QuizItem { DisplayChar = "C", Name = "Circle" });
+        pool.Add(new QuizItem { DisplayChar = "T", Name = "Triangle" });
+        pool.Add(new QuizItem { DisplayChar = "S", Name = "Square" });
         for (int i = 1; i <= 5; i++)
             pool.Add(new QuizItem { DisplayChar = i.ToString(), Name = NumberWord(i) });
         for (char c = 'A'; c <= 'Z'; c++)
             pool.Add(new QuizItem { DisplayChar = c.ToString(), Name = c.ToString() });
-
-        QuizItem[] result = new QuizItem[count];
-        HashSet<int> used = new HashSet<int>();
-        for (int i = 0; i < count; i++)
-        {
-            int idx;
-            do idx = Random.Range(0, pool.Count);
-            while (used.Contains(idx));
-            used.Add(idx);
-            result[i] = pool[idx];
-        }
-        return result;
+        return pool.ToArray();
     }
 
     static string NumberWord(int n)
@@ -262,19 +251,11 @@ public class GameModeManager : MonoBehaviour
             sr.color = new Color(0.15f, 0.15f, 0.5f, 0.85f);
             sr.sortingOrder = 60;
 
-            GameObject lgo = new GameObject("Label");
-            lgo.transform.SetParent(btn.transform, false);
-            Canvas lc = lgo.AddComponent<Canvas>();
-            lc.renderMode = RenderMode.WorldSpace;
-            lc.worldCamera = cam;
-            RectTransform lr = lgo.GetComponent<RectTransform>();
-            lr.sizeDelta = new Vector2(2, 2);
-            Text lt = lgo.AddComponent<Text>();
-            lt.text = btns[i].label;
-            lt.fontSize = 100;
-            lt.alignment = TextAnchor.MiddleCenter;
-            lt.color = Color.white;
-            lt.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 100);
+            TextMeshPro tmp = btn.AddComponent<TextMeshPro>();
+            tmp.text = btns[i].label;
+            tmp.fontSize = 1.5f;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = Color.white;
 
             BoxCollider2D col = btn.AddComponent<BoxCollider2D>();
             col.size = Vector2.one;
@@ -300,6 +281,56 @@ public class GameModeManager : MonoBehaviour
                 sr.color = active ? new Color(0.3f, 0.3f, 0.7f, 1f) : new Color(0.15f, 0.15f, 0.5f, 0.85f);
             }
         }
+    }
+
+    static Sprite GenerateShapeSprite(ShapeType type, Color color)
+    {
+        int size = 128;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        float cx = size / 2f;
+        float cy = size / 2f;
+        float r = size / 2f - 2;
+
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                bool inside = false;
+                float fx = x - cx;
+                float fy = y - cy;
+
+                switch (type)
+                {
+                    case ShapeType.Circle:
+                        inside = (fx * fx + fy * fy) <= r * r;
+                        break;
+                    case ShapeType.Triangle:
+                        inside = PointInTriangle(fx, fy, 0, r, -r, -r * 0.6f, r, -r * 0.6f);
+                        break;
+                    case ShapeType.Square:
+                        inside = Mathf.Abs(fx) <= r && Mathf.Abs(fy) <= r;
+                        break;
+                }
+                tex.SetPixel(x, y, inside ? color : Color.clear);
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100);
+    }
+
+    static bool PointInTriangle(float px, float py, float x1, float y1, float x2, float y2, float x3, float y3)
+    {
+        float d1 = Sign(px, py, x1, y1, x2, y2);
+        float d2 = Sign(px, py, x2, y2, x3, y3);
+        float d3 = Sign(px, py, x3, y3, x1, y1);
+        bool hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+        bool hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+        return !(hasNeg && hasPos);
+    }
+
+    static float Sign(float px, float py, float x1, float y1, float x2, float y2)
+    {
+        return (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2);
     }
 
     static Sprite CreateWhiteSprite()

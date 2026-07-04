@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
+using TMPro;
 
 public class ShapeInteraction : MonoBehaviour
 {
@@ -13,12 +13,15 @@ public class ShapeInteraction : MonoBehaviour
     public string displayCharacter = "";
     public string characterName = "";
 
+    public bool isQuizTarget = false;
+    public bool isCorrectAnswer = false;
+
     private static bool _showingInfo = false;
     private static int _infoShownFrame = -1;
     private static GameObject _darkOverlay;
     private static GameObject _shapeDisplay;
-    private static GameObject _charCanvas;
-    private static GameObject _nameCanvas;
+    private static TextMeshPro _charText;
+    private static TextMeshPro _nameText;
     private static AudioSource _infoAudio;
     private static Sprite _whiteSprite;
 
@@ -86,6 +89,15 @@ public class ShapeInteraction : MonoBehaviour
 
     void ShowShapeInfo()
     {
+        if (isQuizTarget && !isCorrectAnswer)
+        {
+            _showingInfo = true;
+            _infoShownFrame = Time.frameCount;
+            ShowQuizFeedback("Try again!", Color.red);
+            Invoke(nameof(DismissInfo), 1.2f);
+            return;
+        }
+
         _showingInfo = true;
         _infoShownFrame = Time.frameCount;
 
@@ -95,31 +107,53 @@ public class ShapeInteraction : MonoBehaviour
                 interaction._rb.simulated = false;
         }
 
+        if (isQuizTarget && isCorrectAnswer)
+        {
+            ShowQuizFeedback("Congratulations!", Color.green);
+            return;
+        }
+
         if (_darkOverlay == null)
             CreateOverlayObjects();
 
         _darkOverlay.SetActive(true);
-        _nameCanvas.SetActive(true);
+        _nameText.gameObject.SetActive(true);
 
         if (isCharacter)
         {
             _shapeDisplay.SetActive(false);
-            _charCanvas.SetActive(true);
-            _charCanvas.GetComponentInChildren<Text>().text = displayCharacter;
+            _charText.gameObject.SetActive(true);
+            _charText.text = displayCharacter;
+            _charText.fontSize = 6;
+            _charText.color = Color.white;
         }
         else
         {
-            _charCanvas.SetActive(false);
+            _charText.gameObject.SetActive(false);
             _shapeDisplay.SetActive(true);
             _shapeDisplay.GetComponent<SpriteRenderer>().sprite = _sprite.sprite;
             _shapeDisplay.GetComponent<SpriteRenderer>().color = _sprite.color;
         }
 
-        _nameCanvas.GetComponentInChildren<Text>().text = _shapeName;
+        _nameText.text = _shapeName;
 
         AudioClip clip = Resources.Load<AudioClip>($"Voices/{_clipName}");
         if (clip != null)
             _infoAudio.PlayOneShot(clip);
+    }
+
+    void ShowQuizFeedback(string message, Color color)
+    {
+        if (_darkOverlay == null)
+            CreateOverlayObjects();
+
+        _darkOverlay.SetActive(true);
+        _shapeDisplay.SetActive(false);
+        _charText.gameObject.SetActive(true);
+        _nameText.gameObject.SetActive(false);
+        _charText.text = message;
+        _charText.color = color;
+        _charText.fontSize = 3;
     }
 
     void CreateOverlayObjects()
@@ -130,68 +164,48 @@ public class ShapeInteraction : MonoBehaviour
 
         _whiteSprite = CreateWhiteSprite();
 
-        _infoAudio = _darkOverlay.AddComponent<AudioSource>();
-
         _darkOverlay = new GameObject("DarkOverlay");
-        _darkOverlay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 1);
+        _darkOverlay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y,
+            cam.transform.position.z + 1);
         _darkOverlay.transform.localScale = new Vector3(camWidth, camHeight, 1);
         SpriteRenderer darkSR = _darkOverlay.AddComponent<SpriteRenderer>();
         darkSR.color = Color.black;
         darkSR.sprite = _whiteSprite;
         darkSR.sortingOrder = 100;
 
+        _infoAudio = _darkOverlay.AddComponent<AudioSource>();
+
         _shapeDisplay = new GameObject("ShapeDisplay");
-        _shapeDisplay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 2);
+        _shapeDisplay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y,
+            cam.transform.position.z + 2);
         _shapeDisplay.transform.localScale = new Vector3(6, 6, 1);
         SpriteRenderer shapeSR = _shapeDisplay.AddComponent<SpriteRenderer>();
         shapeSR.sortingOrder = 101;
 
-        _charCanvas = new GameObject("CharCanvas");
-        _charCanvas.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 2);
-        Canvas charC = _charCanvas.AddComponent<Canvas>();
-        charC.renderMode = RenderMode.WorldSpace;
-        charC.worldCamera = cam;
-        RectTransform charRect = _charCanvas.GetComponent<RectTransform>();
-        charRect.sizeDelta = new Vector2(12, 10);
+        _charText = CreateTMPText("CharText",
+            new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 2),
+            6, Color.white, TextAlignmentOptions.Center);
 
-        GameObject charTextObj = new GameObject("CharText");
-        charTextObj.transform.SetParent(_charCanvas.transform, false);
-        Text charText = charTextObj.AddComponent<Text>();
-        charText.alignment = TextAnchor.MiddleCenter;
-        charText.fontSize = 300;
-        charText.color = Color.white;
-        charText.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 300);
-        RectTransform charTextRect = charTextObj.GetComponent<RectTransform>();
-        charTextRect.anchorMin = Vector2.zero;
-        charTextRect.anchorMax = Vector2.one;
-        charTextRect.offsetMin = Vector2.zero;
-        charTextRect.offsetMax = Vector2.zero;
-
-        _nameCanvas = new GameObject("NameCanvas");
-        _nameCanvas.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y - 3f, cam.transform.position.z + 2);
-        Canvas canvas = _nameCanvas.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.WorldSpace;
-        canvas.worldCamera = cam;
-        RectTransform canvasRect = _nameCanvas.GetComponent<RectTransform>();
-        canvasRect.sizeDelta = new Vector2(8, 2);
-
-        GameObject nameTextObj = new GameObject("NameText");
-        nameTextObj.transform.SetParent(_nameCanvas.transform, false);
-        Text nameText = nameTextObj.AddComponent<Text>();
-        nameText.alignment = TextAnchor.MiddleCenter;
-        nameText.fontSize = 80;
-        nameText.color = Color.white;
-        nameText.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 80);
-        RectTransform textRect = nameTextObj.GetComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = Vector2.zero;
-        textRect.offsetMax = Vector2.zero;
+        _nameText = CreateTMPText("NameText",
+            new Vector3(cam.transform.position.x, cam.transform.position.y - 3f, cam.transform.position.z + 2),
+            1.5f, Color.white, TextAlignmentOptions.Center);
 
         _darkOverlay.SetActive(false);
         _shapeDisplay.SetActive(false);
-        _charCanvas.SetActive(false);
-        _nameCanvas.SetActive(false);
+        _charText.gameObject.SetActive(false);
+        _nameText.gameObject.SetActive(false);
+    }
+
+    TextMeshPro CreateTMPText(string name, Vector3 position, float fontSize, Color color,
+        TextAlignmentOptions align)
+    {
+        GameObject go = new GameObject(name);
+        go.transform.position = position;
+        TextMeshPro tmp = go.AddComponent<TextMeshPro>();
+        tmp.fontSize = fontSize;
+        tmp.color = color;
+        tmp.alignment = align;
+        return tmp;
     }
 
     Sprite CreateWhiteSprite()
@@ -205,16 +219,26 @@ public class ShapeInteraction : MonoBehaviour
     void DismissInfo()
     {
         _showingInfo = false;
+        CancelInvoke(nameof(DismissInfo));
 
         if (_darkOverlay != null) _darkOverlay.SetActive(false);
         if (_shapeDisplay != null) _shapeDisplay.SetActive(false);
-        if (_charCanvas != null) _charCanvas.SetActive(false);
-        if (_nameCanvas != null) _nameCanvas.SetActive(false);
+        if (_charText != null) _charText.gameObject.SetActive(false);
+        if (_nameText != null) _nameText.gameObject.SetActive(false);
 
-        foreach (var interaction in FindObjectsByType<ShapeInteraction>(FindObjectsSortMode.None))
+        if (isCorrectAnswer || !isQuizTarget)
         {
-            if (interaction._rb != null)
-                interaction._rb.simulated = true;
+            foreach (var interaction in FindObjectsByType<ShapeInteraction>(FindObjectsSortMode.None))
+            {
+                if (interaction._rb != null)
+                    interaction._rb.simulated = true;
+            }
+        }
+
+        if (isQuizTarget && isCorrectAnswer)
+        {
+            if (GameModeManager.Instance != null)
+                GameModeManager.Instance.RegenerateQuiz();
         }
     }
 

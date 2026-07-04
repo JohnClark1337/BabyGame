@@ -7,6 +7,8 @@
 
 
 
+extern void EmbeddedAttribute__ctor_m54EBC4221D5E75A98F6244A6C7D65ABFB55681FD (void);
+extern void RefSafetyRulesAttribute__ctor_mAF420833616F09105ED980FF2A451D6B083C0FAE (void);
 extern void IntegratedSubsystem_SetHandle_m22D17A2E0BD8AF0FC18CE09638572D34AD8DB48B (void);
 extern void IntegratedSubsystem_get_running_m18AA0D7AD1CB593DC9EE5F3DC79643717509D6E8 (void);
 extern void IntegratedSubsystem_get_valid_m6537B83457B7E79D9743A0EA9144BD116B0E850B (void);
@@ -39,8 +41,10 @@ extern void SubsystemDescriptorStore_ReportSingleSubsystemAnalytics_Injected_mCB
 extern void SubsystemDescriptorWithProvider_get_id_m9E92FDF45FE9BFB0B28C2AE3EFE475998D01BBC7 (void);
 extern void SubsystemDescriptorWithProvider__ctor_mADB008B99F8F98EDD0C5AEBE00368F96D11FCCD1 (void);
 extern void SubsystemWithProvider__ctor_m7AAC2F13A01D674BF5040F42A08C88611FE60914 (void);
-static Il2CppMethodPointer s_methodPointers[38] = 
+static Il2CppMethodPointer s_methodPointers[40] = 
 {
+	EmbeddedAttribute__ctor_m54EBC4221D5E75A98F6244A6C7D65ABFB55681FD,
+	RefSafetyRulesAttribute__ctor_mAF420833616F09105ED980FF2A451D6B083C0FAE,
 	NULL,
 	IntegratedSubsystem_SetHandle_m22D17A2E0BD8AF0FC18CE09638572D34AD8DB48B,
 	IntegratedSubsystem_get_running_m18AA0D7AD1CB593DC9EE5F3DC79643717509D6E8,
@@ -80,52 +84,54 @@ static Il2CppMethodPointer s_methodPointers[38] =
 	SubsystemDescriptorWithProvider__ctor_mADB008B99F8F98EDD0C5AEBE00368F96D11FCCD1,
 	SubsystemWithProvider__ctor_m7AAC2F13A01D674BF5040F42A08C88611FE60914,
 };
-static const int32_t s_InvokerIndices[38] = 
+static const int32_t s_InvokerIndices[40] = 
 {
+	10896,
+	8109,
 	-1,
-	10868,
-	14014,
-	14014,
-	14014,
-	14417,
-	20959,
-	23211,
-	23438,
+	7935,
+	10435,
+	10435,
+	10435,
+	10896,
+	15286,
+	15727,
+	15929,
 	-1,
-	14201,
-	14417,
+	10405,
+	10896,
 	-1,
-	23531,
-	20954,
-	14417,
-	14201,
-	14417,
-	23898,
-	25137,
-	25137,
-	20959,
-	25137,
-	25137,
-	25137,
+	15649,
+	15286,
+	10896,
+	10405,
+	10896,
+	16280,
+	16707,
+	16707,
+	15286,
+	16707,
+	16707,
+	16707,
 	-1,
 	-1,
-	23531,
-	20959,
-	25137,
-	23898,
+	15649,
+	15286,
+	16707,
+	16280,
 	-1,
-	23898,
-	25137,
-	23885,
-	14201,
-	14417,
-	14417,
+	16280,
+	16707,
+	16280,
+	10405,
+	10896,
+	10896,
 };
 static const Il2CppTokenRangePair s_rgctxIndices[3] = 
 {
-	{ 0x0600001A, { 0, 5 } },
-	{ 0x0600001B, { 5, 11 } },
-	{ 0x06000020, { 16, 9 } },
+	{ 0x0600001C, { 0, 5 } },
+	{ 0x0600001D, { 5, 11 } },
+	{ 0x06000022, { 16, 9 } },
 };
 extern const uint32_t g_rgctx_List_1_t4D4A4160AD6A5AF7BE63E6C9DDD4B2E4E331E8AD;
 extern const uint32_t g_rgctx_List_1_Clear_m263E9405C711E2BF06E72D12C60C6DB44FD83E60;
@@ -184,7 +190,7 @@ IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_SubsystemsModule_CodeGen
 const Il2CppCodeGenModule g_UnityEngine_SubsystemsModule_CodeGenModule = 
 {
 	"UnityEngine.SubsystemsModule.dll",
-	38,
+	40,
 	s_methodPointers,
 	0,
 	NULL,

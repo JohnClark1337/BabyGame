@@ -596,7 +596,6 @@ GameObject:
   - component: {fileID: 1442262098}
   - component: {fileID: 1442262101}
   - component: {fileID: 1442262102}
-  - component: {fileID: 1442262104}
   m_Layer: 0
   m_Name: Circle
   m_TagString: Untagged
@@ -698,25 +697,12 @@ Transform:
   m_GameObject: {fileID: 1442262096}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 0.0016558822, w: 0.9999986}
-  m_LocalPosition: {x: 4.89, y: 0.04, z: 0}
-  m_LocalScale: {x: 2.7605, y: 2.709, z: 1}
+  m_LocalPosition: {x: 1.5, y: 1.5, z: 0}
+  m_LocalScale: {x: 3.59, y: 3.52, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0.19}
---- !u!114 &1442262101
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1442262096}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3c4662121eaa2044b6e61ad22512722, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BounceScript
-  initialSpeed: 5
 --- !u!58 &1442262102
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -753,7 +739,7 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!114 &1442262104
+--- !u!114 &1442262101
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -762,12 +748,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1442262096}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
+  m_Script: {fileID: 11500000, guid: a3c4662121eaa2044b6e61ad22512722, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
+  m_EditorClassIdentifier: Assembly-CSharp::BounceScript
+  initialSpeed: 5
 --- !u!1 &1481025280
 GameObject:
   m_ObjectHideFlags: 0
@@ -941,8 +925,8 @@ Transform:
   m_GameObject: {fileID: 1481025280}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.1919, y: 3.1376, z: 0}
-  m_LocalScale: {x: 2.3939703, y: 2.089167, z: 1}
+  m_LocalPosition: {x: -1, y: 1.5, z: 0}
+  m_LocalScale: {x: 3.11, y: 2.72, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1248,8 +1232,8 @@ Transform:
   m_GameObject: {fileID: 2000879836}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.165, y: -0.2208, z: 0}
-  m_LocalScale: {x: 3.0799384, y: 2.9074085, z: 1}
+  m_LocalPosition: {x: 0, y: -1.5, z: 0}
+  m_LocalScale: {x: 4.00, y: 3.78, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
