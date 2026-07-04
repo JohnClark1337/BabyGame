@@ -14,11 +14,22 @@ public class GameModeManager : MonoBehaviour
     private List<GameObject> _modeButtons = new List<GameObject>();
     private static Sprite _whiteSprite;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void AutoInitialize()
+    {
+        if (Instance != null) return;
+        GameObject go = new GameObject("GameModeManager");
+        go.AddComponent<GameModeManager>();
+    }
+
     void Awake()
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
+    }
 
+    void Start()
+    {
         _whiteSprite = CreateWhiteSprite();
 
         foreach (string name in new[] { "Circle", "Triangle", "Square" })
@@ -28,10 +39,6 @@ public class GameModeManager : MonoBehaviour
         }
 
         CreateModeButtons();
-    }
-
-    void Start()
-    {
         ActivateShapes();
     }
 
