@@ -9,10 +9,15 @@ public class ShapeInteraction : MonoBehaviour
     private string _shapeName;
     private string _clipName;
 
+    public bool isCharacter = false;
+    public string displayCharacter = "";
+    public string characterName = "";
+
     private static bool _showingInfo = false;
     private static int _infoShownFrame = -1;
     private static GameObject _darkOverlay;
     private static GameObject _shapeDisplay;
+    private static GameObject _charCanvas;
     private static GameObject _nameCanvas;
     private static AudioSource _infoAudio;
     private static Sprite _whiteSprite;
@@ -21,12 +26,22 @@ public class ShapeInteraction : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _sprite = GetComponent<SpriteRenderer>();
-        _shapeName = CleanName(gameObject.name);
-        _clipName = _shapeName.ToLowerInvariant();
+        if (isCharacter)
+        {
+            _shapeName = characterName;
+            _clipName = characterName.ToLowerInvariant();
+        }
+        else
+        {
+            _shapeName = CleanName(gameObject.name);
+            _clipName = _shapeName.ToLowerInvariant();
+        }
     }
 
     void Update()
     {
+        if (_rb == null) return;
+
         if (_showingInfo)
         {
             if (_infoShownFrame != Time.frameCount && AnyTouchBeganThisFrame())
@@ -63,7 +78,7 @@ public class ShapeInteraction : MonoBehaviour
     {
         Camera cam = Camera.main;
         if (cam == null) return;
-        Vector3 worldPos = cam.ScreenToWorldPoint(screenPosition);
+        Vector3 worldPos = cam.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, 0));
         Collider2D col = GetComponent<Collider2D>();
         if (col != null && col.OverlapPoint(worldPos))
             ShowShapeInfo();
@@ -84,11 +99,22 @@ public class ShapeInteraction : MonoBehaviour
             CreateOverlayObjects();
 
         _darkOverlay.SetActive(true);
-        _shapeDisplay.SetActive(true);
         _nameCanvas.SetActive(true);
 
-        _shapeDisplay.GetComponent<SpriteRenderer>().sprite = _sprite.sprite;
-        _shapeDisplay.GetComponent<SpriteRenderer>().color = _sprite.color;
+        if (isCharacter)
+        {
+            _shapeDisplay.SetActive(false);
+            _charCanvas.SetActive(true);
+            _charCanvas.GetComponentInChildren<Text>().text = displayCharacter;
+        }
+        else
+        {
+            _charCanvas.SetActive(false);
+            _shapeDisplay.SetActive(true);
+            _shapeDisplay.GetComponent<SpriteRenderer>().sprite = _sprite.sprite;
+            _shapeDisplay.GetComponent<SpriteRenderer>().color = _sprite.color;
+        }
+
         _nameCanvas.GetComponentInChildren<Text>().text = _shapeName;
 
         AudioClip clip = Resources.Load<AudioClip>($"Voices/{_clipName}");
@@ -104,7 +130,7 @@ public class ShapeInteraction : MonoBehaviour
 
         _whiteSprite = CreateWhiteSprite();
 
-        _infoAudio = gameObject.AddComponent<AudioSource>();
+        _infoAudio = _darkOverlay.AddComponent<AudioSource>();
 
         _darkOverlay = new GameObject("DarkOverlay");
         _darkOverlay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 1);
@@ -119,6 +145,27 @@ public class ShapeInteraction : MonoBehaviour
         _shapeDisplay.transform.localScale = new Vector3(6, 6, 1);
         SpriteRenderer shapeSR = _shapeDisplay.AddComponent<SpriteRenderer>();
         shapeSR.sortingOrder = 101;
+
+        _charCanvas = new GameObject("CharCanvas");
+        _charCanvas.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 2);
+        Canvas charC = _charCanvas.AddComponent<Canvas>();
+        charC.renderMode = RenderMode.WorldSpace;
+        charC.worldCamera = cam;
+        RectTransform charRect = _charCanvas.GetComponent<RectTransform>();
+        charRect.sizeDelta = new Vector2(12, 10);
+
+        GameObject charTextObj = new GameObject("CharText");
+        charTextObj.transform.SetParent(_charCanvas.transform, false);
+        Text charText = charTextObj.AddComponent<Text>();
+        charText.alignment = TextAnchor.MiddleCenter;
+        charText.fontSize = 300;
+        charText.color = Color.white;
+        charText.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 300);
+        RectTransform charTextRect = charTextObj.GetComponent<RectTransform>();
+        charTextRect.anchorMin = Vector2.zero;
+        charTextRect.anchorMax = Vector2.one;
+        charTextRect.offsetMin = Vector2.zero;
+        charTextRect.offsetMax = Vector2.zero;
 
         _nameCanvas = new GameObject("NameCanvas");
         _nameCanvas.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y - 3f, cam.transform.position.z + 2);
@@ -143,6 +190,7 @@ public class ShapeInteraction : MonoBehaviour
 
         _darkOverlay.SetActive(false);
         _shapeDisplay.SetActive(false);
+        _charCanvas.SetActive(false);
         _nameCanvas.SetActive(false);
     }
 
@@ -160,6 +208,7 @@ public class ShapeInteraction : MonoBehaviour
 
         if (_darkOverlay != null) _darkOverlay.SetActive(false);
         if (_shapeDisplay != null) _shapeDisplay.SetActive(false);
+        if (_charCanvas != null) _charCanvas.SetActive(false);
         if (_nameCanvas != null) _nameCanvas.SetActive(false);
 
         foreach (var interaction in FindObjectsByType<ShapeInteraction>(FindObjectsSortMode.None))
