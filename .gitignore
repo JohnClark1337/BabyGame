@@ -25,6 +25,9 @@ Assets/AssetStoreTools*
 # VS Code
 .vscode/
 
+# Build logs
+*.log
+
 # OS files
 .DS_Store
 Thumbs.db

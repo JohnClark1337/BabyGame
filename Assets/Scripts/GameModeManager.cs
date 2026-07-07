@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
 public enum ShapeType { Circle, Triangle, Square }
 
@@ -15,6 +14,22 @@ public class GameModeManager : MonoBehaviour
     private List<GameObject> _dynamicObjects = new List<GameObject>();
     private List<GameObject> _modeButtons = new List<GameObject>();
     private static Sprite _whiteSprite;
+    private static Font _defaultFont;
+
+    static float LandscapeHW(Camera cam)
+    {
+        float aspect = (float)Mathf.Max(Screen.width, Screen.height) / Mathf.Min(Screen.width, Screen.height);
+        return cam.orthographicSize * aspect;
+    }
+
+    static Font DefaultFont()
+    {
+        if (_defaultFont != null) return _defaultFont;
+        _defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        if (_defaultFont == null)
+            _defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        return _defaultFont;
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoInitialize()
@@ -28,19 +43,21 @@ public class GameModeManager : MonoBehaviour
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
+        Screen.orientation = ScreenOrientation.LandscapeLeft;
     }
 
     void Start()
     {
-        Screen.orientation = ScreenOrientation.LandscapeLeft;
         _whiteSprite = CreateWhiteSprite();
 
         RemoveOldWalls();
 
+        float scale = 2.4f;
+
         (string name, Color color, ShapeType st)[] shapeDefs = {
-            ("Circle", new Color(0.2f, 0.5f, 0.9f, 1f), ShapeType.Circle),
-            ("Triangle", new Color(0.9f, 0.3f, 0.2f, 1f), ShapeType.Triangle),
-            ("Square (4)", new Color(0.2f, 0.8f, 0.3f, 1f), ShapeType.Square),
+            ("Circle", new Color(0f, 0.7f, 1f, 1f), ShapeType.Circle),
+            ("Triangle", new Color(1f, 0.2f, 0f, 1f), ShapeType.Triangle),
+            ("Square (4)", new Color(0f, 1f, 0.2f, 1f), ShapeType.Square),
         };
 
         foreach (var (sName, sColor, sType) in shapeDefs)
@@ -55,10 +72,10 @@ public class GameModeManager : MonoBehaviour
                 if (rb != null)
                 {
                     rb.gravityScale = 0;
-                    rb.linearDamping = 1f;
-                    rb.angularDamping = 1f;
+                    rb.linearDamping = 0;
+                    rb.angularDamping = 0;
                 }
-                go.transform.localScale = Vector3.one;
+                go.transform.localScale = Vector3.one * scale;
                 _sceneShapes.Add(go);
             }
         }
@@ -115,6 +132,9 @@ public class GameModeManager : MonoBehaviour
                 shape.SetActive(true);
                 if (shape.GetComponent<ShapeInteraction>() == null)
                     shape.AddComponent<ShapeInteraction>();
+                Rigidbody2D rb = shape.GetComponent<Rigidbody2D>();
+                if (rb != null)
+                    rb.linearVelocity = Random.insideUnitCircle.normalized * 4f;
             }
         }
     }
@@ -140,42 +160,45 @@ public class GameModeManager : MonoBehaviour
     {
         Camera cam = Camera.main;
         float hh = cam.orthographicSize;
-        float hw = hh * cam.aspect;
+        float hw = LandscapeHW(cam);
 
         GameObject obj = new GameObject(name);
         obj.transform.position = new Vector3(
             Random.Range(-hw + 2, hw - 2),
             Random.Range(-hh + 2, hh - 2), 0);
+        obj.transform.localScale = Vector3.one * 2.4f;
 
         Rigidbody2D rb = obj.AddComponent<Rigidbody2D>();
         rb.gravityScale = 0;
         rb.linearDamping = 0;
         rb.freezeRotation = true;
-        rb.linearVelocity = Random.insideUnitCircle.normalized * 5f;
+        rb.linearVelocity = Random.insideUnitCircle.normalized * 4f;
 
         BoxCollider2D col = obj.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(2, 2);
+        col.size = Vector2.one;
 
-        GameObject labelGO = new GameObject("Label");
-        labelGO.transform.SetParent(obj.transform, false);
-        Canvas canvas = labelGO.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.WorldSpace;
-        canvas.worldCamera = cam;
-        canvas.sortingOrder = 10;
-        RectTransform cr = labelGO.GetComponent<RectTransform>();
-        cr.sizeDelta = new Vector2(2, 2);
+        SpriteRenderer sr = obj.AddComponent<SpriteRenderer>();
+        sr.sprite = _whiteSprite;
+        Color[] bgColors = {
+            new Color(0f, 0.7f, 1f, 0.9f),
+            new Color(1f, 0.2f, 0f, 0.9f),
+            new Color(0f, 1f, 0.2f, 0.9f),
+            new Color(1f, 0.9f, 0f, 0.9f),
+            new Color(1f, 0f, 0.7f, 0.9f),
+        };
+        sr.color = bgColors[Random.Range(0, bgColors.Length)];
+        sr.sortingOrder = 0;
 
-        Text text = labelGO.AddComponent<Text>();
-        text.text = displayChar;
-        text.fontSize = 120;
-        text.alignment = TextAnchor.MiddleCenter;
-        text.color = Color.white;
-        text.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 120);
-        RectTransform tr = text.GetComponent<RectTransform>();
-        tr.anchorMin = Vector2.zero;
-        tr.anchorMax = Vector2.one;
-        tr.offsetMin = Vector2.zero;
-        tr.offsetMax = Vector2.zero;
+        Font font = DefaultFont();
+        TextMesh tmp = obj.AddComponent<TextMesh>();
+        if (font != null) tmp.font = font;
+        tmp.text = displayChar;
+        tmp.fontSize = 20;
+        tmp.alignment = TextAlignment.Center;
+        tmp.anchor = TextAnchor.MiddleCenter;
+        tmp.color = Color.white;
+        MeshRenderer mr = tmp.GetComponent<MeshRenderer>();
+        if (mr != null) mr.sortingOrder = 1;
 
         obj.AddComponent<BounceScript>();
         ShapeInteraction si = obj.AddComponent<ShapeInteraction>();
@@ -192,7 +215,7 @@ public class GameModeManager : MonoBehaviour
     {
         Camera cam = Camera.main;
         float hh = cam.orthographicSize;
-        float hw = hh * cam.aspect;
+        float hw = LandscapeHW(cam);
 
         QuizItem[] pool = GenerateQuizPool();
 
@@ -222,21 +245,20 @@ public class GameModeManager : MonoBehaviour
             choices[j] = t;
         }
 
+        Font font = DefaultFont();
         GameObject promptGO = new GameObject("QuizPrompt");
-        promptGO.transform.position = new Vector3(cam.transform.position.x, hh - 2f, -5);
-        Canvas pc = promptGO.AddComponent<Canvas>();
-        pc.renderMode = RenderMode.WorldSpace;
-        pc.worldCamera = cam;
-        pc.sortingOrder = 20;
-        RectTransform pr = promptGO.GetComponent<RectTransform>();
-        pr.sizeDelta = new Vector2(14, 2);
-        Text pt = promptGO.AddComponent<Text>();
+        promptGO.transform.position = new Vector3(cam.transform.position.x, hh - 3f, 0);
+        TextMesh pt = promptGO.AddComponent<TextMesh>();
+        if (font != null) pt.font = font;
         pt.text = $"Find the {correct.Name}!";
-        pt.fontSize = 80;
-        pt.alignment = TextAnchor.MiddleCenter;
+        pt.fontSize = 20;
+        pt.alignment = TextAlignment.Center;
+        pt.anchor = TextAnchor.MiddleCenter;
         pt.color = Color.yellow;
-        pt.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 80);
+        MeshRenderer pmr = pt.GetComponent<MeshRenderer>();
+        if (pmr != null) pmr.sortingOrder = 20;
         _dynamicObjects.Add(promptGO);
+        NativeTTS.Speak($"Find the {correct.Name}");
 
         foreach (var item in choices)
         {
@@ -269,52 +291,40 @@ public class GameModeManager : MonoBehaviour
     {
         Camera cam = Camera.main;
         float hh = cam.orthographicSize;
-        float hw = hh * cam.aspect;
+        float hw = LandscapeHW(cam);
 
         (string label, GameMode mode)[] btns = {
-            ("\u25B3", GameMode.Shapes),
+            ("S", GameMode.Shapes),
             ("1", GameMode.Numbers),
             ("A", GameMode.Letters),
             ("?", GameMode.Quiz),
         };
 
-        float totalW = hw * 2;
-        float btnSize = Mathf.Min(2.5f, totalW / (btns.Length + 1));
-        float spacing = (totalW - btnSize) / btns.Length;
-        float startX = -hw + spacing / 2;
+        float btnSize = 2f;
+        float gap = 0.5f;
+        float totalW = btns.Length * btnSize + (btns.Length - 1) * gap;
+        float startX = -totalW / 2 + btnSize / 2;
+        float y = hh - btnSize / 2 - 0.5f;
 
         for (int i = 0; i < btns.Length; i++)
         {
             GameObject btn = new GameObject($"Btn_{btns[i].label}");
-            float x = startX + i * spacing;
-            float y = hh - btnSize / 2 - 0.3f;
-            btn.transform.position = new Vector3(x, y, -5);
-            btn.transform.localScale = new Vector3(btnSize, btnSize, 1);
+            btn.transform.position = new Vector3(startX + i * (btnSize + gap), y, 0);
+            btn.transform.localScale = Vector3.one * btnSize;
 
             SpriteRenderer sr = btn.AddComponent<SpriteRenderer>();
             sr.sprite = _whiteSprite;
-            sr.color = new Color(0.15f, 0.15f, 0.5f, 0.85f);
+            sr.color = new Color(0.15f, 0.15f, 0.7f, 1f);
             sr.sortingOrder = 60;
 
-            GameObject lgo = new GameObject("Label");
-            lgo.transform.SetParent(btn.transform, false);
-            Canvas lc = lgo.AddComponent<Canvas>();
-            lc.renderMode = RenderMode.WorldSpace;
-            lc.worldCamera = cam;
-            lc.sortingOrder = 61;
-            RectTransform lr = lgo.GetComponent<RectTransform>();
-            lr.sizeDelta = new Vector2(1.5f, 1.5f);
-            Text lt = lgo.AddComponent<Text>();
-            lt.text = btns[i].label;
-            lt.fontSize = 80;
-            lt.alignment = TextAnchor.MiddleCenter;
-            lt.color = Color.white;
-            lt.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", 80);
-            RectTransform tr = lt.GetComponent<RectTransform>();
-            tr.anchorMin = Vector2.zero;
-            tr.anchorMax = Vector2.one;
-            tr.offsetMin = Vector2.zero;
-            tr.offsetMax = Vector2.zero;
+            TextMesh tmp = btn.AddComponent<TextMesh>();
+            tmp.text = btns[i].label;
+            tmp.fontSize = 48;
+            tmp.alignment = TextAlignment.Center;
+            tmp.anchor = TextAnchor.MiddleCenter;
+            tmp.color = Color.white;
+            MeshRenderer bmr = tmp.GetComponent<MeshRenderer>();
+            if (bmr != null) bmr.sortingOrder = 61;
 
             BoxCollider2D col = btn.AddComponent<BoxCollider2D>();
             col.size = Vector2.one;
@@ -337,7 +347,7 @@ public class GameModeManager : MonoBehaviour
             if (mb != null && sr != null)
             {
                 bool active = mb.mode == CurrentMode;
-                sr.color = active ? new Color(0.3f, 0.3f, 0.7f, 1f) : new Color(0.15f, 0.15f, 0.5f, 0.85f);
+                sr.color = active ? new Color(0.4f, 0.4f, 1f, 1f) : new Color(0.15f, 0.15f, 0.7f, 0.85f);
             }
         }
     }

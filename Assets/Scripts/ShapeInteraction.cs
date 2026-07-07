@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class ShapeInteraction : MonoBehaviour
 {
@@ -20,8 +19,8 @@ public class ShapeInteraction : MonoBehaviour
     private static int _infoShownFrame = -1;
     private static GameObject _darkOverlay;
     private static GameObject _shapeDisplay;
-    private static Text _charText;
-    private static Text _nameText;
+    private static TextMesh _charText;
+    private static TextMesh _nameText;
     private static AudioSource _infoAudio;
     private static Sprite _whiteSprite;
 
@@ -101,7 +100,7 @@ public class ShapeInteraction : MonoBehaviour
         _showingInfo = true;
         _infoShownFrame = Time.frameCount;
 
-        foreach (var interaction in FindObjectsByType<ShapeInteraction>(FindObjectsSortMode.None))
+        foreach (var interaction in FindObjectsByType<ShapeInteraction>())
         {
             if (interaction._rb != null)
                 interaction._rb.simulated = false;
@@ -124,7 +123,7 @@ public class ShapeInteraction : MonoBehaviour
             _shapeDisplay.SetActive(false);
             _charText.gameObject.SetActive(true);
             _charText.text = displayCharacter;
-            _charText.fontSize = 300;
+            _charText.fontSize = 30;
             _charText.color = Color.white;
         }
         else
@@ -136,10 +135,13 @@ public class ShapeInteraction : MonoBehaviour
         }
 
         _nameText.text = _shapeName;
+        _nameText.fontSize = 14;
 
         AudioClip clip = Resources.Load<AudioClip>($"Voices/{_clipName}");
         if (clip != null)
             _infoAudio.PlayOneShot(clip);
+        else if (!string.IsNullOrEmpty(_shapeName))
+            NativeTTS.Speak(_shapeName);
     }
 
     void ShowQuizFeedback(string message, Color color)
@@ -153,14 +155,16 @@ public class ShapeInteraction : MonoBehaviour
         _nameText.gameObject.SetActive(false);
         _charText.text = message;
         _charText.color = color;
-        _charText.fontSize = 200;
+        _charText.fontSize = 24;
+        NativeTTS.Speak(message);
     }
 
     void CreateOverlayObjects()
     {
         Camera cam = Camera.main;
         float camHeight = cam.orthographicSize * 2;
-        float camWidth = camHeight * cam.aspect;
+        float aspect = (float)Mathf.Max(Screen.width, Screen.height) / Mathf.Min(Screen.width, Screen.height);
+        float camWidth = camHeight * aspect;
 
         _whiteSprite = CreateWhiteSprite();
 
@@ -176,19 +180,19 @@ public class ShapeInteraction : MonoBehaviour
         _infoAudio = _darkOverlay.AddComponent<AudioSource>();
 
         _shapeDisplay = new GameObject("ShapeDisplay");
-        _shapeDisplay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y,
+        _shapeDisplay.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y + 1,
             cam.transform.position.z + 2);
-        _shapeDisplay.transform.localScale = new Vector3(6, 6, 1);
+        _shapeDisplay.transform.localScale = new Vector3(8, 8, 1);
         SpriteRenderer shapeSR = _shapeDisplay.AddComponent<SpriteRenderer>();
         shapeSR.sortingOrder = 101;
 
-        _charText = CreateCanvasText("CharText",
-            new Vector3(cam.transform.position.x, cam.transform.position.y, cam.transform.position.z + 2),
-            new Vector2(12, 10), 300, Color.white, cam, 102);
+        _charText = CreateTextMesh("CharText",
+            new Vector3(cam.transform.position.x, cam.transform.position.y + 1, cam.transform.position.z + 2),
+            30, Color.white, 102);
 
-        _nameText = CreateCanvasText("NameText",
-            new Vector3(cam.transform.position.x, cam.transform.position.y - 3f, cam.transform.position.z + 2),
-            new Vector2(8, 2), 80, Color.white, cam, 102);
+        _nameText = CreateTextMesh("NameText",
+            new Vector3(cam.transform.position.x, cam.transform.position.y - 4, cam.transform.position.z + 2),
+            14, Color.white, 102);
 
         _darkOverlay.SetActive(false);
         _shapeDisplay.SetActive(false);
@@ -196,30 +200,21 @@ public class ShapeInteraction : MonoBehaviour
         _nameText.gameObject.SetActive(false);
     }
 
-    Text CreateCanvasText(string name, Vector3 position, Vector2 sizeDelta, int fontSize, Color color,
-        Camera cam, int sortingOrder)
+    TextMesh CreateTextMesh(string name, Vector3 position, int fontSize, Color color, int sortingOrder)
     {
         GameObject go = new GameObject(name);
         go.transform.position = position;
-        Canvas c = go.AddComponent<Canvas>();
-        c.renderMode = RenderMode.WorldSpace;
-        c.worldCamera = cam;
-        c.sortingOrder = sortingOrder;
-        RectTransform cr = go.GetComponent<RectTransform>();
-        cr.sizeDelta = sizeDelta;
-
-        Text t = go.AddComponent<Text>();
-        t.fontSize = fontSize;
-        t.color = color;
-        t.alignment = TextAnchor.MiddleCenter;
-        t.font = Font.CreateDynamicFontFromOSFont("Comic Sans MS", fontSize);
-        RectTransform tr = t.GetComponent<RectTransform>();
-        tr.anchorMin = Vector2.zero;
-        tr.anchorMax = Vector2.one;
-        tr.offsetMin = Vector2.zero;
-        tr.offsetMax = Vector2.zero;
-
-        return t;
+        TextMesh tmp = go.AddComponent<TextMesh>();
+        Font font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (font != null) tmp.font = font;
+        tmp.fontSize = fontSize;
+        tmp.color = color;
+        tmp.alignment = TextAlignment.Center;
+        tmp.anchor = TextAnchor.MiddleCenter;
+        MeshRenderer mr = tmp.GetComponent<MeshRenderer>();
+        if (mr != null) mr.sortingOrder = sortingOrder;
+        return tmp;
     }
 
     Sprite CreateWhiteSprite()
@@ -242,7 +237,7 @@ public class ShapeInteraction : MonoBehaviour
 
         if (isCorrectAnswer || !isQuizTarget)
         {
-            foreach (var interaction in FindObjectsByType<ShapeInteraction>(FindObjectsSortMode.None))
+            foreach (var interaction in FindObjectsByType<ShapeInteraction>())
             {
                 if (interaction._rb != null)
                     interaction._rb.simulated = true;

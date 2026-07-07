@@ -50,13 +50,14 @@ public class ScreenEdgeBounds : MonoBehaviour
         bouncyMat.bounciness = _bounciness;
         bouncyMat.friction = _friction;
 
-        float halfHeight = cam.orthographicSize;
-        float halfWidth = halfHeight * cam.aspect;
+        float hh = cam.orthographicSize;
+        float aspect = (float)Mathf.Max(Screen.width, Screen.height) / Mathf.Min(Screen.width, Screen.height);
+        float hw = hh * aspect;
 
-        CreateEdge("Top", new Vector2(0, halfHeight + _thickness * 0.5f), new Vector2(halfWidth * 2, _thickness), bouncyMat);
-        CreateEdge("Bottom", new Vector2(0, -halfHeight - _thickness * 0.5f), new Vector2(halfWidth * 2, _thickness), bouncyMat);
-        CreateEdge("Left", new Vector2(-halfWidth - _thickness * 0.5f, 0), new Vector2(_thickness, halfHeight * 2), bouncyMat);
-        CreateEdge("Right", new Vector2(halfWidth + _thickness * 0.5f, 0), new Vector2(_thickness, halfHeight * 2), bouncyMat);
+        CreateEdge("Top", new Vector2(0, hh + _thickness * 0.5f), new Vector2(hw * 2, _thickness), bouncyMat);
+        CreateEdge("Bottom", new Vector2(0, -hh - _thickness * 0.5f), new Vector2(hw * 2, _thickness), bouncyMat);
+        CreateEdge("Left", new Vector2(-hw - _thickness * 0.5f, 0), new Vector2(_thickness, hh * 2), bouncyMat);
+        CreateEdge("Right", new Vector2(hw + _thickness * 0.5f, 0), new Vector2(_thickness, hh * 2), bouncyMat);
     }
 
     void CreateEdge(string side, Vector2 position, Vector2 size, PhysicsMaterial2D mat)
